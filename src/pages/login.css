@@ -1,0 +1,224 @@
+/* BASIC RESET */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: 'Poppins', Arial, sans-serif;
+}
+
+body {
+  background-color: #eed8c2;
+  color: #333;
+}
+
+/* MAIN LAYOUT */
+.main {
+  display: flex;
+  height: 100vh;
+}
+
+/* LEFT SIDE (IMAGE) */
+.box1 {
+  width: 55%;
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  overflow: hidden;
+  border-radius: 15px 0 0 15px;
+}
+
+.box1 img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  filter: brightness(75%);
+}
+
+.text-overlay {
+  position: absolute;
+  text-align: center;
+  background: rgba(0, 0, 0, 0.45);
+  color: goldenrod;
+  padding: 25px 40px;
+  border-radius: 12px;
+  backdrop-filter: blur(3px);
+}
+
+.text-overlay h2 {
+  font-size: 26px;
+  margin-bottom: 10px;
+}
+
+.text-overlay p {
+  font-size: 15px;
+}
+
+/* RIGHT SIDE (FORMS) */
+.box2 {
+  width: 45%;
+  background: #c1af8a;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  border-left: 4px solid #d4a373;
+  box-shadow: 0 0 12px rgba(0, 0, 0, 0.08);
+  border-radius: 0 15px 15px 0;
+  transition: 0.3s ease;
+  padding: 40px 0;
+}
+
+.box2 h1 {
+  font-size: 24px;
+  font-weight: 600;
+  color: #222;
+  margin-bottom: 25px;
+}
+
+/* TOGGLE BUTTONS */
+.form-toggle {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 30px;
+  width: 80%;
+  max-width: 350px;
+}
+
+.form-toggle button {
+  flex: 1;
+  padding: 10px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  background: #e0e0e0;
+  font-weight: bold;
+  transition: 0.3s ease;
+}
+
+.form-toggle button.active {
+  background: #333;
+  color: white;
+}
+
+.form-toggle button:hover {
+  background: #555;
+  color: white;
+}
+
+/* FORMS */
+form {
+  display: none;
+  flex-direction: column;
+  gap: 18px;
+  width: 80%;
+  max-width: 350px;
+  opacity: 0;
+  transform: translateY(15px);
+  transition: all 0.4s ease;
+}
+
+form.active {
+  display: flex;
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* NAME FIELDS */
+.name-fields {
+  display: flex;
+  gap: 15px;
+}
+
+.name-fields input {
+  flex: 1;
+}
+
+/* INPUT FIELDS */
+input {
+  width: 100%;
+  padding: 12px;
+  border: 1px solid #bbb;
+  border-radius: 8px;
+  outline: none;
+  transition: 0.3s;
+  font-size: 15px;
+}
+
+input:focus {
+  border-color: #d4a373;
+}
+
+/* SUBMIT BUTTON */
+input[type="submit"] {
+  background: linear-gradient(90deg, #d4a373, #cda274);
+  color: white;
+  border: none;
+  cursor: pointer;
+  font-weight: bold;
+  transition: background 0.3s ease;
+}
+
+input[type="submit"]:hover {
+  background: linear-gradient(90deg, #cda274, #d4a373);
+}
+
+/* REMEMBER ME + FORGOT PASSWORD */
+.options-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 14px;
+}
+
+.remember-me {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  color: #333;
+}
+
+.remember-me input {
+  accent-color: #d4a373;
+}
+
+.forgot-password {
+  color: #2b1d0f;
+  text-decoration: none;
+}
+
+.forgot-password:hover {
+  text-decoration: underline;
+}
+
+/* RESPONSIVE DESIGN */
+@media (max-width: 768px) {
+  .main {
+    flex-direction: column;
+    height: auto;
+  }
+
+  .box1,
+  .box2 {
+    width: 100%;
+  }
+
+  .box1 {
+    height: 250px;
+  }
+
+  .box2 {
+    padding: 25px;
+    border-left: none;
+    border-top: 4px solid #d4a373;
+    border-radius: 0 0 15px 15px;
+  }
+
+  .text-overlay {
+    padding: 15px 25px;
+  }
+
+  .text-overlay h2 {
+    font-size: 20px;
+  }
+}
