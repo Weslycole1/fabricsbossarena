@@ -47,7 +47,7 @@ const Home = ({ cart, setCart }) => {
   ];
 
   const handleLogout = () => {
-    navigate("/Login");
+    navigate("/login");
   };
 
   const addToCart = (product) => {
