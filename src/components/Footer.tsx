@@ -1,7 +1,7 @@
 const Footer = () => {
   return (
     <footer className="footer">
-      <p>© 2025 FabricsBossArena | Designed with ❤ by Ponmile Cole-Showers</p>
+      <p>© 2026 FabricsBossArena | Designed with ❤ by Wesley Cole-Showers</p>
     </footer>
   );
 };
