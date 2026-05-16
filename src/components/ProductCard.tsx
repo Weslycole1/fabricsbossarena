@@ -1,55 +1,70 @@
 import { useNavigate } from "react-router-dom";
+import { useTheme } from "../context/ThemeContext";
+import type { Product } from "../types/product";
 
-const ProductCard = ({ product, addToCart }) => {
+interface ProductCardProps {
+  product: Product;
+  addToCart: (product: Product) => void;
+}
+
+const ProductCard = ({ product, addToCart }: ProductCardProps) => {
   const navigate = useNavigate();
+  const { t } = useTheme();
 
   const message = `Hello, I am interested in buying *${product.name}* priced at ₦${product.price.toLocaleString()}. Is it available?`;
-
-  const whatsappURL = `https://wa.me/2348034401331?text=${encodeURIComponent(
-    message,
-  )}`;
-
-  const handleAddToCart = () => {
-    if (!addToCart) {
-      console.log("addToCart not passed");
-      return;
-    }
-
-    addToCart(product);
-  };
+  const whatsappURL = `https://wa.me/2348034401331?text=${encodeURIComponent(message)}`;
 
   return (
-    <div className="product-card">
-      <img
-        src={product.img}
-        alt={product.name}
+    <div
+      className={`${t.cardBg} rounded-2xl overflow-hidden shadow-sm hover:shadow-lg transition-all duration-300 hover:-translate-y-1 flex flex-col border ${t.border} h-full group`}
+    >
+      <div
+        className="relative overflow-hidden h-52 cursor-pointer"
         onClick={() => navigate(`/products/${product.id}`)}
-        style={{ cursor: "pointer" }}
-      />
+      >
+        <img
+          src={product.img}
+          alt={product.name}
+          className="h-52 w-full object-cover group-hover:scale-105 transition-transform duration-500"
+        />
+        <span className="absolute top-3 right-3 bg-[#C9974A] text-white text-xs font-bold px-3 py-1 rounded-full capitalize">
+          {product.tag}
+        </span>
+      </div>
 
-      <h3>{product.name}</h3>
-      <p className="price">₦{product.price.toLocaleString()}</p>
-      <p className="desc">{product.desc}</p>
+      <div className="p-4 flex flex-col gap-2 flex-1">
+        <h3 className={`text-lg font-bold line-clamp-1 ${t.textPrimary}`}>
+          {product.name}
+        </h3>
+        <p className="text-[#C9974A] font-bold text-base">
+          ₦{product.price.toLocaleString()}
+        </p>
+        <p className={`text-sm line-clamp-2 ${t.textSecondary}`}>
+          {product.desc}
+        </p>
 
-      <div className="buttons">
-        <button className="cart-btn" onClick={handleAddToCart}>
-          Add to Cart
-        </button>
-        <button
-          className="buy-btn"
-          onClick={() => navigate(`/products/${product.id}`)}
-        >
-          Buy Now
-        </button>
+        <div className="mt-auto flex flex-col gap-2 pt-2">
+          <button
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation();
+              addToCart(product);
+            }}
+            className="bg-[#C9974A] hover:bg-[#b8863a] text-white font-semibold py-2.5 rounded-xl transition w-full text-sm sm:text-base"
+          >
+            Add to Cart
+          </button>
 
-        <a
-          className="whatsapp-btn"
-          href={whatsappURL}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          WhatsApp Seller
-        </a>
+          <a
+            href={whatsappURL}
+            target="_blank"
+            rel="noopener noreferrer"
+            onClick={(e) => e.stopPropagation()}
+            className="bg-[#25D366] hover:bg-[#1ebe5c] text-white font-semibold py-2.5 rounded-xl transition w-full text-center text-sm sm:text-base"
+          >
+            WhatsApp Seller
+          </a>
+        </div>
       </div>
     </div>
   );

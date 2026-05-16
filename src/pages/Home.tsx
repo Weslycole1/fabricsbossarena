@@ -1,84 +1,51 @@
 import { useNavigate } from "react-router-dom";
 import { useState } from "react";
-import "./home.css";
 
-// Components
 import Navbar from "../components/Navbar";
 import FilterBar from "../components/FilterBar";
 import ProductCard from "../components/ProductCard";
 import Footer from "../components/Footer";
+import { products } from "../data/products";
+import { useTheme } from "../context/ThemeContext";
+import type { Product } from "../types/product";
 
-// Images
-import fabric1 from "../assets/Silk.jpeg";
-import fabric2 from "../assets/Ankara.jpeg";
-import fabric3 from "../assets/velvet.jpeg";
-const Home = ({ cart, setCart }) => {
+const TAG_FILTERS = ["exclusive", "luxury", "budget", "trending"];
+
+interface HomeProps {
+  cart: (Product & { qty: number })[];
+  setCart: React.Dispatch<React.SetStateAction<(Product & { qty: number })[]>>;
+  addToCart: (product: Product) => void;
+}
+
+const Home = ({ cart, addToCart }: HomeProps) => {
   const navigate = useNavigate();
+  const { t } = useTheme();
 
   const [search, setSearch] = useState("");
   const [category, setCategory] = useState("all");
-  const [sort, setSort] = useState("default");
-
-  const products = [
-    {
-      id: 1,
-      name: "Royal Silk",
-      price: 25000,
-      category: "silk",
-      img: fabric1,
-      desc: "Luxurious silk fabric with soft elegance for premium outfits.",
-    },
-    {
-      id: 2,
-      name: "Velvet Charm",
-      price: 30000,
-      category: "velvet",
-      img: fabric3,
-      desc: "Premium velvet with a timeless shine — perfect for luxury wears.",
-    },
-    {
-      id: 3,
-      name: "Ankara Gold",
-      price: 12500,
-      category: "ankara",
-      img: fabric2,
-      desc: "Vibrant African print with bold golden accents — bright and beautiful.",
-    },
-  ];
+  const [sort, setSort] = useState("");
 
   const handleLogout = () => {
     navigate("/login");
   };
 
-  const addToCart = (product) => {
-    setCart((prevCart) => {
-      const existing = prevCart.find((item) => item.id === product.id);
-
-      if (existing) {
-        return prevCart.map((item) =>
-          item.id === product.id ? { ...item, qty: item.qty + 1 } : item
-        );
-      } else {
-        return [...prevCart, { ...product, qty: 1 }];
-      }
-    });
-  };
-
-  // FILTER, SEARCH, SORT
   const filteredProducts = products
     .filter((p) => p.name.toLowerCase().includes(search.toLowerCase()))
-    .filter((p) => (category === "all" ? true : p.category === category))
+    .filter((p) => {
+      if (category === "all") return true;
+      if (TAG_FILTERS.includes(category)) return p.tag === category;
+      return p.category === category;
+    })
     .sort((a, b) => {
       if (sort === "low-high") return a.price - b.price;
       if (sort === "high-low") return b.price - a.price;
-
       if (sort === "newest") return b.id - a.id;
       if (sort === "oldest") return a.id - b.id;
       return 0;
     });
 
   return (
-    <div className="home-page">
+    <div className={`min-h-screen ${t.pageBg}`}>
       <Navbar onLogout={handleLogout} />
 
       <FilterBar
@@ -88,11 +55,17 @@ const Home = ({ cart, setCart }) => {
         cartLength={cart.length}
       />
 
-      <section className="product-container">
+      <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 px-4 sm:px-6 lg:px-8 py-6 sm:py-8 max-w-7xl mx-auto">
         {filteredProducts.map((p) => (
           <ProductCard key={p.id} product={p} addToCart={addToCart} />
         ))}
       </section>
+
+      {filteredProducts.length === 0 && (
+        <p className={`text-center py-12 px-4 ${t.textSecondary}`}>
+          No fabrics match your search.
+        </p>
+      )}
 
       <Footer />
     </div>
