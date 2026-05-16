@@ -65,10 +65,10 @@ const Cart = ({ cart, setCart, wishlistLength = 0 }: CartProps) => {
   };
 
   return (
-    <div className={`min-h-screen ${t.pageBg}`}>
+    <div className={`min-h-screen overflow-x-hidden ${t.pageBg}`}>
       <Navbar cartLength={cart.length} wishlistLength={wishlistLength} />
 
-      <h2 className={`text-3xl font-bold px-6 pt-8 pb-4 ${t.headingDark}`}>
+      <h2 className={`text-2xl sm:text-3xl font-bold px-4 sm:px-6 lg:px-8 pt-6 sm:pt-8 pb-4 ${t.headingDark}`}>
         Your Cart
       </h2>
 
@@ -91,8 +91,8 @@ const Cart = ({ cart, setCart, wishlistLength = 0 }: CartProps) => {
           </Link>
         </div>
       ) : (
-        <div className="max-w-5xl mx-auto px-4 sm:px-6 py-6 grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8">
-          <div className="lg:col-span-2 flex flex-col gap-4">
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-6 grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8">
+          <div className="lg:col-span-2 flex flex-col gap-4 order-1">
             {cart.map((item) => (
               <div
                 key={item.id}
@@ -101,7 +101,7 @@ const Cart = ({ cart, setCart, wishlistLength = 0 }: CartProps) => {
                 <img
                   src={item.img}
                   alt={item.name}
-                  className="w-20 h-20 sm:w-24 sm:h-24 rounded-xl object-cover flex-shrink-0"
+                  className="w-16 h-16 md:w-24 md:h-24 rounded-xl object-cover flex-shrink-0"
                 />
 
                 <div className="flex-1 min-w-0">
@@ -154,7 +154,7 @@ const Cart = ({ cart, setCart, wishlistLength = 0 }: CartProps) => {
           </div>
 
           <div
-            className={`${t.cardBg} rounded-2xl p-5 sm:p-6 shadow-sm border ${t.border} lg:col-span-1 sticky top-24 self-start`}
+            className={`${t.cardBg} rounded-2xl p-5 sm:p-6 shadow-sm border ${t.border} lg:col-span-1 order-2 lg:order-0 lg:sticky lg:top-24 self-start w-full`}
           >
             <h3
               className={`font-bold text-base sm:text-lg mb-4 ${t.textPrimary}`}

@@ -13,10 +13,10 @@ const Products = ({ wishlist, toggleWishlist, addToCart }: ProductsProps) => {
   const { t } = useTheme();
 
   return (
-    <div className={`min-h-screen ${t.pageBg} px-4 sm:px-6 py-8`}>
-      <h2 className={`text-2xl font-bold mb-6 ${t.textPrimary}`}>Our Fabrics</h2>
+    <div className={`min-h-screen overflow-x-hidden ${t.pageBg} px-4 sm:px-6 lg:px-8 py-8`}>
+      <h2 className={`text-xl sm:text-2xl font-bold mb-6 ${t.textPrimary}`}>Our Fabrics</h2>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 max-w-7xl mx-auto">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 max-w-7xl mx-auto">
         {products.map((product) => (
           <ProductCard
             key={product.id}

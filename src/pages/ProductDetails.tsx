@@ -34,7 +34,7 @@ const ProductDetails = ({
     <button
       type="button"
       onClick={() => navigate("/home")}
-      className={`${t.backBtn} mx-4 sm:mx-6 mt-4`}
+      className={`${t.backBtn} mx-4 sm:mx-6 mt-4 text-xs sm:text-sm`}
     >
       ← Back to Shop
     </button>
@@ -48,7 +48,7 @@ const ProductDetails = ({
 
   if (!product) {
     return (
-      <div className={`min-h-screen ${t.pageBg}`}>
+      <div className={`min-h-screen overflow-x-hidden ${t.pageBg}`}>
         <Navbar wishlistLength={wishlistLength} cartLength={cartLength} />
         {backButton}
         <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-12 text-center">
@@ -59,7 +59,7 @@ const ProductDetails = ({
   }
 
   return (
-    <div className={`min-h-screen ${t.pageBg}`}>
+    <div className={`min-h-screen overflow-x-hidden ${t.pageBg}`}>
       <Navbar wishlistLength={wishlistLength} cartLength={cartLength} />
       {backButton}
 
@@ -67,7 +67,7 @@ const ProductDetails = ({
         <img
           src={product.img}
           alt={product.name}
-          className="rounded-2xl overflow-hidden shadow-md w-full h-72 sm:h-80 md:h-96 object-cover"
+          className="rounded-2xl overflow-hidden shadow-md w-full h-64 md:h-96 object-cover"
         />
 
         <div>

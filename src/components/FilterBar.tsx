@@ -1,4 +1,3 @@
-import { Link } from "react-router-dom";
 import { useState } from "react";
 import { useTheme } from "../context/ThemeContext";
 
@@ -6,19 +5,13 @@ interface FilterBarProps {
   setSearch: (value: string) => void;
   setCategory: (value: string) => void;
   setSort: (value: string) => void;
-  cartLength: number;
 }
 
 const TAG_CHIPS = ["exclusive", "luxury", "budget", "trending"] as const;
 
-const FilterBar = ({
-  setSearch,
-  setCategory,
-  setSort,
-  cartLength,
-}: FilterBarProps) => {
+const FilterBar = ({ setSearch, setCategory, setSort }: FilterBarProps) => {
   const [activeChip, setActiveChip] = useState("");
-  const { isDark, t } = useTheme();
+  const { t } = useTheme();
 
   const handleChipClick = (value: string) => {
     const next = activeChip === value ? "" : value;
@@ -33,13 +26,10 @@ const FilterBar = ({
 
   const selectClass = `rounded-full border ${t.border} ${t.mutedBg} px-4 py-2 ${t.textPrimary} text-sm focus:border-[#C9974A] outline-none`;
   const chipInactive = `border ${t.border} ${t.mutedBg} ${t.textSecondary} hover:border-[#C9974A] hover:text-[#C9974A]`;
-  const cartBtnClass = isDark
-    ? "bg-[#1A0F08] hover:bg-[#2C2018]"
-    : "bg-[#2C1810] hover:bg-[#3d2415]";
 
   return (
     <section
-      className={`${t.filterBarBg} border-b ${t.border} px-4 sm:px-6 py-4`}
+      className={`${t.filterBarBg} border-b ${t.border} px-4 sm:px-6 lg:px-8 py-4`}
     >
       <input
         type="text"
@@ -48,51 +38,46 @@ const FilterBar = ({
         className={`w-full rounded-full ${t.mutedBg} border ${t.border} px-5 py-2.5 mb-3 text-sm sm:text-base ${t.textPrimary} focus:border-[#C9974A] outline-none`}
       />
 
-      <div className="flex flex-wrap gap-3 items-center justify-between">
-        <div className="flex flex-wrap gap-3 items-center">
-          <select
-            onChange={(e) => handleCategoryChange(e.target.value)}
-            defaultValue="all"
-            className={selectClass}
-          >
-            <option value="all">All Categories</option>
-            <option value="ankara">Ankara</option>
-            <option value="silk">Silk</option>
-            <option value="velvet">Velvet</option>
-            <option value="chiffon">Chiffon</option>
-            <option value="lace">Lace</option>
-          </select>
-
-          <select onChange={(e) => setSort(e.target.value)} defaultValue="" className={selectClass}>
-            <option value="">Sort</option>
-            <option value="low-high">Low → High</option>
-            <option value="high-low">High → Low</option>
-            <option value="newest">New → Old</option>
-            <option value="oldest">Old → New</option>
-          </select>
-
-          {TAG_CHIPS.map((chip) => (
-            <button
-              key={chip}
-              type="button"
-              onClick={() => handleChipClick(chip)}
-              className={`rounded-full px-4 py-2 border text-sm font-medium capitalize transition ${
-                activeChip === chip
-                  ? "bg-[#C9974A] text-white border-[#C9974A]"
-                  : chipInactive
-              }`}
-            >
-              {chip}
-            </button>
-          ))}
-        </div>
-
-        <Link
-          to="/cart"
-          className={`${cartBtnClass} text-white rounded-full px-4 py-2 flex items-center gap-2 text-sm transition shrink-0`}
+      <div className="flex flex-wrap gap-3 items-center">
+        <select
+          onChange={(e) => handleCategoryChange(e.target.value)}
+          defaultValue="all"
+          className={selectClass}
         >
-          🛒 <span>{cartLength}</span>
-        </Link>
+          <option value="all">All Categories</option>
+          <option value="ankara">Ankara</option>
+          <option value="silk">Silk</option>
+          <option value="velvet">Velvet</option>
+          <option value="chiffon">Chiffon</option>
+          <option value="lace">Lace</option>
+        </select>
+
+        <select
+          onChange={(e) => setSort(e.target.value)}
+          defaultValue=""
+          className={selectClass}
+        >
+          <option value="">Sort</option>
+          <option value="low-high">Low → High</option>
+          <option value="high-low">High → Low</option>
+          <option value="newest">New → Old</option>
+          <option value="oldest">Old → New</option>
+        </select>
+
+        {TAG_CHIPS.map((chip) => (
+          <button
+            key={chip}
+            type="button"
+            onClick={() => handleChipClick(chip)}
+            className={`rounded-full px-4 py-2 border text-sm font-medium capitalize transition ${
+              activeChip === chip
+                ? "bg-[#C9974A] text-white border-[#C9974A]"
+                : chipInactive
+            }`}
+          >
+            {chip}
+          </button>
+        ))}
       </div>
     </section>
   );

@@ -140,7 +140,7 @@ const Account = ({
   };
 
   return (
-    <div className="min-h-screen bg-[#FAF7F2]">
+    <div className="min-h-screen overflow-x-hidden bg-[#FAF7F2]">
       <Navbar
         onLogout={handleLogout}
         wishlistLength={wishlistLength}
@@ -148,11 +148,11 @@ const Account = ({
       />
 
       <div className="px-4 sm:px-6 lg:px-8 py-8 max-w-6xl mx-auto">
-        <h1 className="text-3xl font-bold mb-8 text-[#2C1810]">My Account</h1>
+        <h1 className="text-2xl sm:text-3xl font-bold mb-6 sm:mb-8 text-[#2C1810]">My Account</h1>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Profile card */}
-          <div className="bg-white rounded-2xl p-8 shadow-sm border border-[#E8E0D5] text-center lg:col-span-1 h-fit">
+          <div className="bg-white rounded-2xl p-6 sm:p-8 shadow-sm border border-[#E8E0D5] text-center lg:col-span-1 h-fit w-full">
             <div className="bg-gradient-to-br from-[#C9974A] to-[#8a3b21] w-28 h-28 rounded-full flex items-center justify-center text-white text-4xl font-bold mx-auto shadow-lg">
               {avatarLetter}
             </div>
@@ -162,23 +162,23 @@ const Account = ({
               Member since 2026
             </span>
 
-            <div className="grid grid-cols-3 gap-2 mt-6">
+            <div className="grid grid-cols-3 gap-1.5 sm:gap-2 mt-6">
               {PROFILE_STATS.map((stat) => (
                 <div
                   key={stat.key}
-                  className="bg-[#FAF7F2] rounded-xl p-3 text-center"
+                  className="bg-[#FAF7F2] rounded-xl p-2 sm:p-3 text-center"
                 >
-                  <p className="text-[#C9974A] font-bold text-xl">
+                  <p className="text-[#C9974A] font-bold text-base sm:text-xl">
                     {statValues[stat.key]}
                   </p>
-                  <p className="text-[#6B5B4E] text-xs">{stat.label}</p>
+                  <p className="text-[#6B5B4E] text-[10px] sm:text-xs">{stat.label}</p>
                 </div>
               ))}
             </div>
           </div>
 
           {/* Settings cards */}
-          <div className="lg:col-span-2 flex flex-col gap-6">
+          <div className="lg:col-span-2 flex flex-col gap-6 w-full">
             {/* Personal Information */}
             <div className={CARD_CLASS}>
               <h3 className={CARD_HEADING_CLASS}>Personal Information</h3>

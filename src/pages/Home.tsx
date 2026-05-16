@@ -55,7 +55,7 @@ const Home = ({ cart, addToCart, wishlist, toggleWishlist }: HomeProps) => {
 
   const newArrivals = products.slice(0, 3);
   return (
-    <div className={`min-h-screen ${t.pageBg}`}>
+    <div className={`min-h-screen overflow-x-hidden ${t.pageBg}`}>
       <Navbar
         onLogout={handleLogout}
         cartLength={cart.length}
@@ -99,7 +99,6 @@ const Home = ({ cart, addToCart, wishlist, toggleWishlist }: HomeProps) => {
         setSearch={setSearch}
         setCategory={setCategory}
         setSort={setSort}
-        cartLength={cart.length}
       />
 
       {!loading && filteredProducts.length === 0 && (
@@ -121,7 +120,7 @@ const Home = ({ cart, addToCart, wishlist, toggleWishlist }: HomeProps) => {
         </div>
       )}
 
-      <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 px-4 sm:px-6 lg:px-8 py-6 sm:py-8 max-w-7xl mx-auto">
+      <section className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 px-4 sm:px-6 lg:px-8 py-6 sm:py-8 max-w-7xl mx-auto">
         {loading
           ? Array.from({ length: 6 }).map((_, i) => <SkeletonCard key={i} />)
           : filteredProducts.map((p) => (

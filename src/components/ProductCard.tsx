@@ -43,16 +43,16 @@ const ProductCard = ({
 
   return (
     <div
-      className={`${t.cardBg} rounded-2xl overflow-hidden shadow-sm hover:shadow-lg transition-all duration-300 hover:-translate-y-1 flex flex-col border ${t.border} h-full group`}
+      className={`${t.cardBg} rounded-2xl overflow-hidden shadow-sm hover:shadow-lg transition-all duration-300 hover:-translate-y-1 flex flex-col border ${t.border} h-full w-full group`}
     >
       <div
-        className="relative overflow-hidden h-52 cursor-pointer"
+        className="relative overflow-hidden h-48 md:h-52 cursor-pointer"
         onClick={() => navigate(`/products/${product.id}`)}
       >
         <img
           src={product.img}
           alt={product.name}
-          className="h-52 w-full object-cover group-hover:scale-105 transition-transform duration-500"
+          className="h-48 md:h-52 w-full object-cover group-hover:scale-105 transition-transform duration-500"
         />
 
         <button

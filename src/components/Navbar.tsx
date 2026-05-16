@@ -32,46 +32,45 @@ const Navbar = ({ onLogout, cartLength = 0, wishlistLength = 0 }: NavbarProps) =
   };
 
   const iconBtn =
-    "relative flex items-center justify-center w-9 h-9 rounded-full border border-[#C9974A]/50 text-[#C9974A] hover:bg-[#C9974A] hover:text-white transition text-base";
+    "relative flex items-center justify-center w-7 h-7 sm:w-9 sm:h-9 rounded-full border border-[#C9974A]/50 text-[#C9974A] hover:bg-[#C9974A] hover:text-white transition text-sm sm:text-base";
+
+  const linkClass = (path: string) =>
+    `text-sm font-medium transition ${
+      isActive(path)
+        ? "text-[#C9974A]"
+        : "text-white/80 hover:text-[#C9974A]"
+    }`;
 
   return (
     <nav
       className={`sticky top-0 z-50 w-full ${t.navbarBg} border-b ${t.navbarBorder}`}
     >
       <div className="px-4 sm:px-6 lg:px-8 py-3 sm:py-4">
-        <div className="flex items-center justify-between gap-4">
+        <div className="flex items-center justify-between gap-3 sm:gap-4">
           <Link
             to="/home"
-            className="flex items-center gap-2 shrink-0"
+            className="flex items-center gap-2 shrink-0 min-w-0"
             onClick={() => setMenuOpen(false)}
           >
-            <span className="text-lg sm:text-xl">🧵</span>
-            <span className="text-white font-bold text-sm sm:text-base md:text-lg lg:text-xl">
+            <span className="text-base sm:text-xl">🧵</span>
+            <span className="text-white font-bold text-base sm:text-xl truncate">
               FabricsBossArena
             </span>
           </Link>
 
-          <div className="hidden lg:flex items-center gap-6">
+          <div className="hidden md:flex items-center gap-6">
             {NAV_LINKS.map((link) => (
-              <Link
-                key={link.label}
-                to={link.path}
-                className={`text-sm font-medium transition ${
-                  isActive(link.path)
-                    ? "text-[#C9974A]"
-                    : "text-white/80 hover:text-[#C9974A]"
-                }`}
-              >
+              <Link key={link.label} to={link.path} className={linkClass(link.path)}>
                 {link.label}
               </Link>
             ))}
           </div>
 
-          <div className="flex items-center gap-2 sm:gap-3">
+          <div className="flex items-center gap-1.5 sm:gap-3 shrink-0">
             <Link to="/wishlist" className={iconBtn} title="Wishlist">
               ❤️
               {wishlistLength > 0 && (
-                <span className="absolute -top-1 -right-1 min-w-[18px] h-[18px] px-1 bg-[#C9974A] text-white text-[10px] font-bold rounded-full flex items-center justify-center">
+                <span className="absolute -top-1 -right-1 min-w-[16px] sm:min-w-[18px] h-[16px] sm:h-[18px] px-0.5 sm:px-1 bg-[#C9974A] text-white text-[9px] sm:text-[10px] font-bold rounded-full flex items-center justify-center">
                   {wishlistLength}
                 </span>
               )}
@@ -84,7 +83,7 @@ const Navbar = ({ onLogout, cartLength = 0, wishlistLength = 0 }: NavbarProps) =
             <Link to="/cart" className={iconBtn} title="Cart">
               🛒
               {cartLength > 0 && (
-                <span className="absolute -top-1 -right-1 min-w-[18px] h-[18px] px-1 bg-[#C9974A] text-white text-[10px] font-bold rounded-full flex items-center justify-center">
+                <span className="absolute -top-1 -right-1 min-w-[16px] sm:min-w-[18px] h-[16px] sm:h-[18px] px-0.5 sm:px-1 bg-[#C9974A] text-white text-[9px] sm:text-[10px] font-bold rounded-full flex items-center justify-center">
                   {cartLength}
                 </span>
               )}
@@ -93,7 +92,7 @@ const Navbar = ({ onLogout, cartLength = 0, wishlistLength = 0 }: NavbarProps) =
             <button
               type="button"
               onClick={toggleTheme}
-              className="border border-[#C9974A] text-[#C9974A] rounded-full px-2.5 sm:px-3 py-1.5 text-xs sm:text-sm hover:bg-[#C9974A] hover:text-white transition hidden sm:flex items-center gap-1"
+              className="border border-[#C9974A] text-[#C9974A] rounded-full px-2 sm:px-3 py-1 sm:py-1.5 text-xs sm:text-sm hover:bg-[#C9974A] hover:text-white transition hidden sm:flex items-center gap-1"
               aria-label={isDark ? "Switch to light mode" : "Switch to dark mode"}
             >
               {isDark ? "☀️" : "🌙"}
@@ -121,34 +120,23 @@ const Navbar = ({ onLogout, cartLength = 0, wishlistLength = 0 }: NavbarProps) =
             <button
               type="button"
               onClick={() => setMenuOpen((prev) => !prev)}
-              className="lg:hidden flex flex-col justify-center gap-1 w-9 h-9 rounded-full border border-[#C9974A]/50 text-[#C9974A] hover:bg-[#C9974A] hover:text-white transition items-center"
+              className="md:hidden text-white text-2xl leading-none px-1 py-0.5 hover:text-[#C9974A] transition"
               aria-label="Toggle menu"
+              aria-expanded={menuOpen}
             >
-              <span
-                className={`block w-4 h-0.5 bg-current transition-transform ${menuOpen ? "rotate-45 translate-y-1.5" : ""}`}
-              />
-              <span
-                className={`block w-4 h-0.5 bg-current transition-opacity ${menuOpen ? "opacity-0" : ""}`}
-              />
-              <span
-                className={`block w-4 h-0.5 bg-current transition-transform ${menuOpen ? "-rotate-45 -translate-y-1.5" : ""}`}
-              />
+              ☰
             </button>
           </div>
         </div>
 
         {menuOpen && (
-          <div className="lg:hidden mt-4 pt-4 border-t border-white/10 flex flex-col gap-3">
+          <div className="md:hidden mt-4 pt-4 border-t border-white/10 flex flex-col gap-3">
             {NAV_LINKS.map((link) => (
               <Link
                 key={link.label}
                 to={link.path}
                 onClick={() => setMenuOpen(false)}
-                className={`text-sm font-medium transition py-1 ${
-                  isActive(link.path)
-                    ? "text-[#C9974A]"
-                    : "text-white/80 hover:text-[#C9974A]"
-                }`}
+                className={`${linkClass(link.path)} py-1`}
               >
                 {link.label}
               </Link>
@@ -156,11 +144,7 @@ const Navbar = ({ onLogout, cartLength = 0, wishlistLength = 0 }: NavbarProps) =
             <Link
               to="/account"
               onClick={() => setMenuOpen(false)}
-              className={`text-sm font-medium transition py-1 ${
-                isActive("/account")
-                  ? "text-[#C9974A]"
-                  : "text-white/80 hover:text-[#C9974A]"
-              }`}
+              className={`${linkClass("/account")} py-1`}
             >
               My Account
             </Link>
@@ -176,6 +160,10 @@ const Navbar = ({ onLogout, cartLength = 0, wishlistLength = 0 }: NavbarProps) =
           </div>
         )}
       </div>
+
+      <p className="text-[#C9974A] text-sm font-semibold italic text-center py-1.5 border-t border-white/10">
+        Where Elegance Meets Every Thread
+      </p>
     </nav>
   );
 };

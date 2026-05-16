@@ -21,9 +21,9 @@ const Login = () => {
   };
 
   return (
-    <div className={`min-h-screen flex flex-col lg:flex-row ${t.pageBg}`}>
+    <div className={`min-h-screen overflow-x-hidden flex flex-col lg:flex-row ${t.pageBg}`}>
       {/* Mobile premium banner */}
-      <div className="lg:hidden relative h-48 w-full flex-shrink-0">
+      <div className="lg:hidden relative h-32 w-full flex-shrink-0">
         <img
           src={fabricImage}
           alt="Premium fabrics"

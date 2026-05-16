@@ -54,7 +54,7 @@ const Contact = ({ wishlistLength = 0, cartLength = 0 }: ContactProps) => {
   };
 
   return (
-    <div className={`min-h-screen ${t.pageBg}`}>
+    <div className={`min-h-screen overflow-x-hidden ${t.pageBg}`}>
       <Navbar
         onLogout={handleLogout}
         wishlistLength={wishlistLength}
@@ -62,15 +62,15 @@ const Contact = ({ wishlistLength = 0, cartLength = 0 }: ContactProps) => {
       />
 
       <main className="px-4 sm:px-6 lg:px-8 py-10 sm:py-14 max-w-5xl mx-auto">
-        <h1 className={`text-3xl sm:text-4xl font-bold text-center mb-10 sm:mb-14 ${t.headingDark}`}>
+        <h1 className={`text-2xl sm:text-4xl font-bold text-center mb-8 sm:mb-14 ${t.headingDark}`}>
           Get In Touch
         </h1>
 
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {CONTACT_CARDS.map((card) => (
             <div
               key={card.title}
-              className={`${t.cardBg} rounded-2xl p-6 shadow-sm border ${t.border} text-center`}
+              className={`${t.cardBg} rounded-2xl p-6 shadow-sm border ${t.border} text-center w-full`}
             >
               <span className="text-4xl mb-3 block">{card.icon}</span>
               <h3 className={`font-bold text-lg mb-2 ${t.textPrimary}`}>

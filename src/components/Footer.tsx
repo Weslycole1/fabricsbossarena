@@ -5,9 +5,11 @@ const Footer = () => {
 
   return (
     <footer
-      className={`${t.footerBg} text-center text-[#C9974A]/70 text-xs sm:text-sm py-5 sm:py-6 mt-8`}
+      className={`${t.footerBg} text-center text-[#C9974A]/70 text-[10px] sm:text-sm py-5 sm:py-6 mt-8 px-4`}
     >
-      <p>© 2026 FabricsBossArena | Designed with ❤️ by Wesley Cole-Showers</p>
+      <p className="max-w-lg mx-auto">
+        © 2026 FabricsBossArena | Designed with ❤️ by Wesley Cole-Showers
+      </p>
     </footer>
   );
 };

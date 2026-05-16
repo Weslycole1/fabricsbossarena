@@ -29,7 +29,7 @@ const Wishlist = ({
   };
 
   return (
-    <div className={`min-h-screen ${t.pageBg}`}>
+    <div className={`min-h-screen overflow-x-hidden ${t.pageBg}`}>
       <Navbar
         onLogout={handleLogout}
         wishlistLength={wishlist.length}
@@ -60,7 +60,7 @@ const Wishlist = ({
             </Link>
           </div>
         ) : (
-          <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+          <section className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
             {savedProducts.map((p) => (
               <ProductCard
                 key={p.id}

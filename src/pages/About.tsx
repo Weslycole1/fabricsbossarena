@@ -35,7 +35,7 @@ const About = ({ wishlistLength = 0, cartLength = 0 }: AboutProps) => {
   };
 
   return (
-    <div className={`min-h-screen ${t.pageBg}`}>
+    <div className={`min-h-screen overflow-x-hidden ${t.pageBg}`}>
       <Navbar
         onLogout={handleLogout}
         wishlistLength={wishlistLength}
@@ -44,7 +44,7 @@ const About = ({ wishlistLength = 0, cartLength = 0 }: AboutProps) => {
 
       <main className="px-4 sm:px-6 lg:px-8 py-10 sm:py-14 max-w-4xl mx-auto">
         <section className="text-center mb-12 sm:mb-16">
-          <h1 className={`text-3xl sm:text-4xl lg:text-5xl font-bold mb-6 ${t.headingDark}`}>
+          <h1 className={`text-2xl sm:text-4xl lg:text-5xl font-bold mb-6 ${t.headingDark}`}>
             Our Story
           </h1>
           <p className={`${t.textSecondary} leading-relaxed text-base sm:text-lg max-w-2xl mx-auto`}>
@@ -59,7 +59,7 @@ const About = ({ wishlistLength = 0, cartLength = 0 }: AboutProps) => {
           <h2 className={`text-xl sm:text-2xl font-bold text-center mb-8 ${t.textPrimary}`}>
             Our Values
           </h2>
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {VALUES.map((value) => (
               <div
                 key={value.title}
