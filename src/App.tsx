@@ -9,6 +9,7 @@ import About from "./pages/About";
 import Contact from "./pages/Contact";
 import Cart from "./pages/Cart";
 import Wishlist from "./pages/Wishlist";
+import Account from "./pages/Account";
 import ProductDetails from "./pages/ProductDetails";
 
 const WISHLIST_KEY = "fabricsbossarena-wishlist";
@@ -32,17 +33,19 @@ function App() {
     }
   }, [wishlist]);
 
-  const addToCart = (product: Product) => {
+  const addToCart = (product: Product, quantity = 1) => {
     setCart((prevCart) => {
       const existing = prevCart.find((item) => item.id === product.id);
 
       if (existing) {
         return prevCart.map((item) =>
-          item.id === product.id ? { ...item, qty: item.qty + 1 } : item
+          item.id === product.id
+            ? { ...item, qty: item.qty + quantity }
+            : item
         );
       }
 
-      return [...prevCart, { ...product, qty: 1 }];
+      return [...prevCart, { ...product, qty: quantity }];
     });
   };
 
@@ -50,6 +53,13 @@ function App() {
     setWishlist((prev) =>
       prev.includes(id) ? prev.filter((itemId) => itemId !== id) : [...prev, id]
     );
+  };
+
+  const clearWishlist = () => setWishlist([]);
+
+  const sharedNav = {
+    wishlistLength: wishlist.length,
+    cartLength: cart.length,
   };
 
   return (
@@ -70,13 +80,7 @@ function App() {
       />
       <Route
         path="/cart"
-        element={
-          <Cart
-            cart={cart}
-            setCart={setCart}
-            wishlistLength={wishlist.length}
-          />
-        }
+        element={<Cart cart={cart} setCart={setCart} {...sharedNav} />}
       />
       <Route
         path="/wishlist"
@@ -87,6 +91,12 @@ function App() {
             addToCart={addToCart}
             cartLength={cart.length}
           />
+        }
+      />
+      <Route
+        path="/account"
+        element={
+          <Account clearWishlist={clearWishlist} {...sharedNav} />
         }
       />
       <Route
@@ -102,31 +112,11 @@ function App() {
       <Route
         path="/products/:id"
         element={
-          <ProductDetails
-            addToCart={addToCart}
-            wishlistLength={wishlist.length}
-            cartLength={cart.length}
-          />
+          <ProductDetails addToCart={addToCart} {...sharedNav} />
         }
       />
-      <Route
-        path="/about"
-        element={
-          <About
-            wishlistLength={wishlist.length}
-            cartLength={cart.length}
-          />
-        }
-      />
-      <Route
-        path="/contact"
-        element={
-          <Contact
-            wishlistLength={wishlist.length}
-            cartLength={cart.length}
-          />
-        }
-      />
+      <Route path="/about" element={<About {...sharedNav} />} />
+      <Route path="/contact" element={<Contact {...sharedNav} />} />
     </Routes>
   );
 }

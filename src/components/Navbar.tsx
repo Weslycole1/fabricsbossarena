@@ -41,7 +41,6 @@ const Navbar = ({ onLogout, cartLength = 0, wishlistLength = 0 }: NavbarProps) =
     >
       <div className="px-4 sm:px-6 lg:px-8 py-3 sm:py-4">
         <div className="flex items-center justify-between gap-4">
-          {/* Logo */}
           <Link
             to="/home"
             className="flex items-center gap-2 shrink-0"
@@ -53,7 +52,6 @@ const Navbar = ({ onLogout, cartLength = 0, wishlistLength = 0 }: NavbarProps) =
             </span>
           </Link>
 
-          {/* Desktop nav links */}
           <div className="hidden lg:flex items-center gap-6">
             {NAV_LINKS.map((link) => (
               <Link
@@ -70,7 +68,6 @@ const Navbar = ({ onLogout, cartLength = 0, wishlistLength = 0 }: NavbarProps) =
             ))}
           </div>
 
-          {/* Right icons */}
           <div className="flex items-center gap-2 sm:gap-3">
             <Link to="/wishlist" className={iconBtn} title="Wishlist">
               ❤️
@@ -79,6 +76,10 @@ const Navbar = ({ onLogout, cartLength = 0, wishlistLength = 0 }: NavbarProps) =
                   {wishlistLength}
                 </span>
               )}
+            </Link>
+
+            <Link to="/account" className={iconBtn} title="Account">
+              👤
             </Link>
 
             <Link to="/cart" className={iconBtn} title="Cart">
@@ -118,7 +119,6 @@ const Navbar = ({ onLogout, cartLength = 0, wishlistLength = 0 }: NavbarProps) =
               </button>
             )}
 
-            {/* Hamburger — mobile */}
             <button
               type="button"
               onClick={() => setMenuOpen((prev) => !prev)}
@@ -138,7 +138,6 @@ const Navbar = ({ onLogout, cartLength = 0, wishlistLength = 0 }: NavbarProps) =
           </div>
         </div>
 
-        {/* Mobile nav dropdown */}
         {menuOpen && (
           <div className="lg:hidden mt-4 pt-4 border-t border-white/10 flex flex-col gap-3">
             {NAV_LINKS.map((link) => (
@@ -155,6 +154,17 @@ const Navbar = ({ onLogout, cartLength = 0, wishlistLength = 0 }: NavbarProps) =
                 {link.label}
               </Link>
             ))}
+            <Link
+              to="/account"
+              onClick={() => setMenuOpen(false)}
+              className={`text-sm font-medium transition py-1 ${
+                isActive("/account")
+                  ? "text-[#C9974A]"
+                  : "text-white/80 hover:text-[#C9974A]"
+              }`}
+            >
+              My Account
+            </Link>
             {onLogout && (
               <button
                 type="button"

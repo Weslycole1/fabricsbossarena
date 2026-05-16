@@ -9,7 +9,7 @@ import type { Product } from "../types/product";
 interface WishlistProps {
   wishlist: number[];
   toggleWishlist: (id: number) => void;
-  addToCart: (product: Product) => void;
+  addToCart: (product: Product, quantity?: number) => void;
   cartLength?: number;
 }
 
@@ -42,15 +42,21 @@ const Wishlist = ({
         </h1>
 
         {savedProducts.length === 0 ? (
-          <div className="flex flex-col items-center justify-center py-20 text-center">
-            <p className={`text-lg sm:text-xl mb-6 ${t.textSecondary}`}>
-              No saved items yet ❤️
+          <div
+            className={`${t.cardBg} rounded-2xl p-12 shadow-sm border ${t.border} text-center max-w-md mx-auto`}
+          >
+            <p className="text-6xl mb-4">❤️</p>
+            <h3 className={`text-2xl font-bold mb-2 ${t.headingDark}`}>
+              No saved items yet
+            </h3>
+            <p className={`${t.textSecondary} mb-6`}>
+              Tap the heart on any fabric to save it here
             </p>
             <Link
               to="/home"
-              className="bg-[#C9974A] hover:bg-[#b8863a] text-white font-semibold px-6 py-3 rounded-xl transition"
+              className="inline-block bg-[#C9974A] hover:bg-[#b8863a] text-white font-semibold px-8 py-3 rounded-xl transition"
             >
-              Browse Products
+              Explore Fabrics
             </Link>
           </div>
         ) : (

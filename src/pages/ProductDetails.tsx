@@ -1,11 +1,13 @@
+import { useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import Navbar from "../components/Navbar";
 import { products } from "../data/products";
 import { useTheme } from "../context/ThemeContext";
+import { useToast } from "../hooks/useToast";
 import type { Product } from "../types/product";
 
 interface ProductDetailsProps {
-  addToCart: (product: Product) => void;
+  addToCart: (product: Product, quantity?: number) => void;
   wishlistLength?: number;
   cartLength?: number;
 }
@@ -18,6 +20,8 @@ const ProductDetails = ({
   const { id } = useParams();
   const navigate = useNavigate();
   const { t } = useTheme();
+  const { showToast } = useToast();
+  const [quantity, setQuantity] = useState(1);
 
   const product = products.find((p) => p.id === Number(id));
 
@@ -35,6 +39,12 @@ const ProductDetails = ({
       ← Back to Shop
     </button>
   );
+
+  const handleAddToCart = () => {
+    if (!product) return;
+    addToCart(product, quantity);
+    showToast("Added to cart! 🛒", "success");
+  };
 
   if (!product) {
     return (
@@ -83,9 +93,43 @@ const ProductDetails = ({
             {product.desc}
           </p>
 
+          {/* Quantity selector */}
+          <div className="mb-6">
+            <p className={`text-sm font-medium mb-3 ${t.textSecondary}`}>
+              Quantity
+            </p>
+            <div className="flex items-center gap-4">
+              <button
+                type="button"
+                onClick={() => setQuantity((q) => Math.max(1, q - 1))}
+                disabled={quantity <= 1}
+                className={`w-10 h-10 rounded-full border ${t.border} ${t.cardBg} font-bold text-lg transition ${
+                  quantity <= 1
+                    ? "opacity-40 cursor-not-allowed text-gray-400"
+                    : "hover:border-[#C9974A] hover:text-[#C9974A]"
+                } ${t.textPrimary}`}
+              >
+                −
+              </button>
+              <span
+                className={`text-xl font-bold w-8 text-center ${t.textPrimary}`}
+              >
+                {quantity}
+              </span>
+              <button
+                type="button"
+                onClick={() => setQuantity((q) => Math.min(10, q + 1))}
+                disabled={quantity >= 10}
+                className={`w-10 h-10 rounded-full border ${t.border} ${t.cardBg} font-bold text-lg transition hover:border-[#C9974A] hover:text-[#C9974A] disabled:opacity-40 disabled:cursor-not-allowed ${t.textPrimary}`}
+              >
+                +
+              </button>
+            </div>
+          </div>
+
           <button
             type="button"
-            onClick={() => addToCart(product)}
+            onClick={handleAddToCart}
             className="bg-[#C9974A] hover:bg-[#b8863a] text-white font-bold py-3 rounded-xl w-full transition mb-3 text-sm sm:text-base"
           >
             Add to Cart

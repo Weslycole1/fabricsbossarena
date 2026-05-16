@@ -1,10 +1,11 @@
 import { useNavigate } from "react-router-dom";
 import { useTheme } from "../context/ThemeContext";
+import { useToast } from "../hooks/useToast";
 import type { Product } from "../types/product";
 
 interface ProductCardProps {
   product: Product;
-  addToCart: (product: Product) => void;
+  addToCart: (product: Product, quantity?: number) => void;
   wishlist: number[];
   toggleWishlist: (id: number) => void;
 }
@@ -17,10 +18,28 @@ const ProductCard = ({
 }: ProductCardProps) => {
   const navigate = useNavigate();
   const { t } = useTheme();
+  const { showToast } = useToast();
   const isWishlisted = wishlist.includes(product.id);
 
   const message = `Hello, I am interested in buying *${product.name}* priced at ₦${product.price.toLocaleString()}. Is it available?`;
   const whatsappURL = `https://wa.me/2348034401331?text=${encodeURIComponent(message)}`;
+
+  const handleWishlistClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (isWishlisted) {
+      toggleWishlist(product.id);
+      showToast("Removed from wishlist", "info");
+    } else {
+      toggleWishlist(product.id);
+      showToast("Saved to wishlist ❤️", "success");
+    }
+  };
+
+  const handleAddToCart = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    addToCart(product, 1);
+    showToast("Added to cart! 🛒", "success");
+  };
 
   return (
     <div
@@ -38,10 +57,7 @@ const ProductCard = ({
 
         <button
           type="button"
-          onClick={(e) => {
-            e.stopPropagation();
-            toggleWishlist(product.id);
-          }}
+          onClick={handleWishlistClick}
           className="absolute top-3 left-3 bg-white/80 backdrop-blur-sm rounded-full w-9 h-9 flex items-center justify-center hover:scale-110 transition cursor-pointer shadow-sm text-base z-10"
           aria-label={isWishlisted ? "Remove from wishlist" : "Add to wishlist"}
         >
@@ -67,10 +83,7 @@ const ProductCard = ({
         <div className="mt-auto flex flex-col gap-2 pt-2">
           <button
             type="button"
-            onClick={(e) => {
-              e.stopPropagation();
-              addToCart(product);
-            }}
+            onClick={handleAddToCart}
             className="bg-[#C9974A] hover:bg-[#b8863a] text-white font-semibold py-2.5 rounded-xl transition w-full text-sm sm:text-base"
           >
             Add to Cart

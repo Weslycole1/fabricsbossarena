@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
 import Navbar from "../components/Navbar";
 import { useTheme } from "../context/ThemeContext";
+import { useToast } from "../hooks/useToast";
 
 interface CartItem {
   id: number;
@@ -18,6 +19,7 @@ interface CartProps {
 
 const Cart = ({ cart, setCart, wishlistLength = 0 }: CartProps) => {
   const { t } = useTheme();
+  const { showToast } = useToast();
 
   const increaseQty = (id: number) => {
     setCart((prev) =>
@@ -39,6 +41,7 @@ const Cart = ({ cart, setCart, wishlistLength = 0 }: CartProps) => {
 
   const removeItem = (id: number) => {
     setCart((prev) => prev.filter((item) => item.id !== id));
+    showToast("Item removed from cart", "info");
   };
 
   const totalAmount = cart.reduce(
@@ -57,26 +60,34 @@ const Cart = ({ cart, setCart, wishlistLength = 0 }: CartProps) => {
       .join("\n") + `\n\nTotal = ₦${totalAmount.toLocaleString()}`
   );
 
+  const handleCheckout = () => {
+    showToast("Redirecting to WhatsApp... 💬", "success");
+  };
+
   return (
     <div className={`min-h-screen ${t.pageBg}`}>
       <Navbar cartLength={cart.length} wishlistLength={wishlistLength} />
 
-      <h2
-        className={`text-3xl font-bold px-6 pt-8 pb-4 ${t.headingDark}`}
-      >
+      <h2 className={`text-3xl font-bold px-6 pt-8 pb-4 ${t.headingDark}`}>
         Your Cart
       </h2>
 
       {cart.length === 0 ? (
         <div
-          className={`flex flex-col items-center justify-center py-20 px-4 ${t.textSecondary}`}
+          className={`${t.cardBg} rounded-2xl p-12 shadow-sm border ${t.border} text-center max-w-md mx-auto mt-12 mx-4 sm:mx-auto`}
         >
-          <p className="text-base sm:text-lg mb-4">Your cart is empty.</p>
+          <p className="text-6xl mb-4">🛒</p>
+          <h3 className={`text-2xl font-bold mb-2 ${t.headingDark}`}>
+            Your cart is empty
+          </h3>
+          <p className={`${t.textSecondary} mb-6`}>
+            Looks like you haven&apos;t added anything yet
+          </p>
           <Link
             to="/home"
-            className="text-[#C9974A] font-medium hover:underline text-sm sm:text-base"
+            className="inline-block bg-[#C9974A] text-white rounded-xl px-8 py-3 font-semibold hover:bg-[#b8863a] transition"
           >
-            ← Continue Shopping
+            Browse Fabrics
           </Link>
         </div>
       ) : (
@@ -162,6 +173,7 @@ const Cart = ({ cart, setCart, wishlistLength = 0 }: CartProps) => {
               href={`https://wa.me/2348034401331?text=${whatsappMessage}`}
               target="_blank"
               rel="noreferrer"
+              onClick={handleCheckout}
               className="block bg-[#25D366] hover:bg-[#1ebe5c] text-white font-bold py-3 rounded-xl w-full text-center transition text-sm sm:text-base"
             >
               Checkout on WhatsApp
