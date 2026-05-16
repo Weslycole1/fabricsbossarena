@@ -11,6 +11,14 @@ interface AccountProps {
   clearWishlist: () => void;
 }
 
+const CARD_CLASS =
+  "bg-white rounded-2xl p-6 shadow-sm border border-[#E8E0D5]";
+const CARD_HEADING_CLASS =
+  "text-lg font-bold text-[#2C1810] mb-4 pb-2 border-b border-[#E8E0D5]";
+const LABEL_CLASS = "text-sm font-medium text-[#6B5B4E] mb-1 block";
+const INPUT_CLASS =
+  "bg-[#FAF7F2] border border-[#E8E0D5] rounded-xl px-4 py-3 w-full focus:border-[#C9974A] focus:ring-1 focus:ring-[#C9974A] outline-none text-[#1A1A1A]";
+
 const getPasswordStrength = (password: string): {
   label: string;
   color: string;
@@ -64,15 +72,13 @@ const PasswordInput = ({
 
   return (
     <div>
-      <label className="block text-sm font-medium text-[#1A1A1A] mb-1.5">
-        {label}
-      </label>
+      <label className={LABEL_CLASS}>{label}</label>
       <div className="relative">
         <input
           type={visible ? "text" : "password"}
           value={value}
           onChange={(e) => onChange(e.target.value)}
-          className="w-full bg-[#FAF7F2] border border-[#E8E0D5] rounded-xl px-4 py-2.5 pr-12 text-[#1A1A1A] focus:border-[#C9974A] outline-none text-sm"
+          className={`${INPUT_CLASS} pr-12`}
         />
         <button
           type="button"
@@ -96,13 +102,19 @@ const PasswordInput = ({
   );
 };
 
+const PROFILE_STATS = [
+  { label: "Orders", key: "orders" as const },
+  { label: "Wishlist", key: "wishlist" as const },
+  { label: "Saved", key: "saved" as const },
+];
+
 const Account = ({
   wishlistLength = 0,
   cartLength = 0,
   clearWishlist,
 }: AccountProps) => {
   const navigate = useNavigate();
-  const { isDark, toggleTheme, t } = useTheme();
+  const { isDark, toggleTheme } = useTheme();
   const { showToast } = useToast();
 
   const [firstName, setFirstName] = useState("Wesley");
@@ -117,14 +129,18 @@ const Account = ({
   const fullName = `${firstName} ${lastName}`.trim();
   const avatarLetter = (firstName[0] || "U").toUpperCase();
 
+  const statValues = {
+    orders: 0,
+    wishlist: wishlistLength,
+    saved: 0,
+  };
+
   const handleLogout = () => {
     navigate("/login");
   };
 
-  const inputClass = `w-full ${t.mutedBg} border ${t.border} rounded-xl px-4 py-2.5 ${t.textPrimary} focus:border-[#C9974A] outline-none text-sm`;
-
   return (
-    <div className={`min-h-screen ${t.pageBg}`}>
+    <div className="min-h-screen bg-[#FAF7F2]">
       <Navbar
         onLogout={handleLogout}
         wishlistLength={wishlistLength}
@@ -132,98 +148,90 @@ const Account = ({
       />
 
       <div className="px-4 sm:px-6 lg:px-8 py-8 max-w-6xl mx-auto">
-        <h1 className={`text-3xl font-bold mb-8 ${t.headingDark}`}>
-          My Account
-        </h1>
+        <h1 className="text-3xl font-bold mb-8 text-[#2C1810]">My Account</h1>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Profile card */}
-          <div
-            className={`${t.cardBg} rounded-2xl p-8 shadow-sm border ${t.border} text-center lg:col-span-1 h-fit`}
-          >
-            <div className="bg-[#C9974A] text-white text-4xl font-bold flex items-center justify-center w-24 h-24 rounded-full mx-auto">
+          <div className="bg-white rounded-2xl p-8 shadow-sm border border-[#E8E0D5] text-center lg:col-span-1 h-fit">
+            <div className="bg-gradient-to-br from-[#C9974A] to-[#8a3b21] w-28 h-28 rounded-full flex items-center justify-center text-white text-4xl font-bold mx-auto shadow-lg">
               {avatarLetter}
             </div>
-            <h2 className={`font-bold text-xl mt-4 ${t.textPrimary}`}>
-              {fullName}
-            </h2>
-            <p className={`${t.textSecondary} text-sm mt-1`}>{email}</p>
-            <span className="inline-block mt-4 bg-[#C9974A]/10 text-[#C9974A] text-xs px-3 py-1 rounded-full">
+            <h2 className="text-2xl font-bold text-[#2C1810] mt-4">{fullName}</h2>
+            <p className="text-[#6B5B4E] text-sm mt-1">{email}</p>
+            <span className="bg-[#C9974A]/10 text-[#C9974A] text-xs font-semibold px-4 py-1.5 rounded-full mt-3 inline-block">
               Member since 2026
             </span>
+
+            <div className="grid grid-cols-3 gap-2 mt-6">
+              {PROFILE_STATS.map((stat) => (
+                <div
+                  key={stat.key}
+                  className="bg-[#FAF7F2] rounded-xl p-3 text-center"
+                >
+                  <p className="text-[#C9974A] font-bold text-xl">
+                    {statValues[stat.key]}
+                  </p>
+                  <p className="text-[#6B5B4E] text-xs">{stat.label}</p>
+                </div>
+              ))}
+            </div>
           </div>
 
           {/* Settings cards */}
           <div className="lg:col-span-2 flex flex-col gap-6">
             {/* Personal Information */}
-            <div
-              className={`${t.cardBg} rounded-2xl p-6 shadow-sm border ${t.border}`}
-            >
-              <h3 className={`font-bold text-lg mb-4 ${t.textPrimary}`}>
-                Personal Information
-              </h3>
+            <div className={CARD_CLASS}>
+              <h3 className={CARD_HEADING_CLASS}>Personal Information</h3>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
                 <div>
-                  <label className={`block text-sm font-medium mb-1.5 ${t.textPrimary}`}>
-                    First Name
-                  </label>
+                  <label className={LABEL_CLASS}>First Name</label>
                   <input
                     type="text"
                     value={firstName}
                     onChange={(e) => setFirstName(e.target.value)}
-                    className={inputClass}
+                    className={INPUT_CLASS}
                   />
                 </div>
                 <div>
-                  <label className={`block text-sm font-medium mb-1.5 ${t.textPrimary}`}>
-                    Last Name
-                  </label>
+                  <label className={LABEL_CLASS}>Last Name</label>
                   <input
                     type="text"
                     value={lastName}
                     onChange={(e) => setLastName(e.target.value)}
-                    className={inputClass}
+                    className={INPUT_CLASS}
                   />
                 </div>
               </div>
               <div className="mb-4">
-                <label className={`block text-sm font-medium mb-1.5 ${t.textPrimary}`}>
-                  Email
-                </label>
+                <label className={LABEL_CLASS}>Email</label>
                 <input
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className={inputClass}
+                  className={INPUT_CLASS}
                 />
               </div>
               <div className="mb-4">
-                <label className={`block text-sm font-medium mb-1.5 ${t.textPrimary}`}>
-                  Phone
-                </label>
+                <label className={LABEL_CLASS}>Phone</label>
                 <input
                   type="tel"
                   value={phone}
                   onChange={(e) => setPhone(e.target.value)}
-                  className={inputClass}
+                  className={INPUT_CLASS}
                 />
               </div>
               <button
                 type="button"
                 onClick={() => showToast("Profile saved successfully!", "success")}
-                className="bg-[#C9974A] text-white rounded-xl px-6 py-2.5 font-semibold hover:bg-[#b8863a] transition"
+                className="bg-[#C9974A] hover:bg-[#b8863a] text-white font-bold rounded-xl px-6 py-2.5 transition shadow-sm"
               >
                 Save Changes
               </button>
             </div>
 
             {/* Change Password */}
-            <div
-              className={`${t.cardBg} rounded-2xl p-6 shadow-sm border ${t.border}`}
-            >
-              <h3 className={`font-bold text-lg mb-4 ${t.textPrimary}`}>
-                Change Password
-              </h3>
+            <div className={CARD_CLASS}>
+              <h3 className={CARD_HEADING_CLASS}>Change Password</h3>
               <div className="flex flex-col gap-4">
                 <PasswordInput
                   label="Current Password"
@@ -254,28 +262,24 @@ const Account = ({
                   setNewPassword("");
                   setConfirmPassword("");
                 }}
-                className="mt-4 bg-[#2C1810] text-white rounded-xl px-6 py-2.5 font-semibold hover:bg-[#3d2415] transition"
+                className="mt-4 bg-[#2C1810] hover:bg-[#3d2415] text-white font-bold rounded-xl px-6 py-2.5 transition shadow-sm"
               >
                 Update Password
               </button>
             </div>
 
             {/* Preferences */}
-            <div
-              className={`${t.cardBg} rounded-2xl p-6 shadow-sm border ${t.border}`}
-            >
-              <h3 className={`font-bold text-lg mb-4 ${t.textPrimary}`}>
-                Preferences
-              </h3>
+            <div className={CARD_CLASS}>
+              <h3 className={CARD_HEADING_CLASS}>Preferences</h3>
               <div className="flex flex-col gap-4">
                 <div className="flex items-center justify-between">
-                  <span className={`text-sm font-medium ${t.textPrimary}`}>
+                  <span className="text-sm font-medium text-[#6B5B4E]">
                     Dark Mode
                   </span>
                   <ToggleSwitch checked={isDark} onChange={toggleTheme} />
                 </div>
                 <div className="flex items-center justify-between">
-                  <span className={`text-sm font-medium ${t.textPrimary}`}>
+                  <span className="text-sm font-medium text-[#6B5B4E]">
                     Email notifications
                   </span>
                   <ToggleSwitch
@@ -284,11 +288,11 @@ const Account = ({
                   />
                 </div>
                 <div className="flex items-center justify-between gap-4">
-                  <span className={`text-sm font-medium ${t.textPrimary}`}>
+                  <span className="text-sm font-medium text-[#6B5B4E]">
                     Language
                   </span>
                   <select
-                    className={`${t.mutedBg} border ${t.border} rounded-xl px-4 py-2 text-sm ${t.textPrimary} focus:border-[#C9974A] outline-none`}
+                    className={`${INPUT_CLASS} w-auto text-sm py-2`}
                     defaultValue="en"
                   >
                     <option value="en">English</option>
@@ -298,8 +302,10 @@ const Account = ({
             </div>
 
             {/* Danger Zone */}
-            <div className="bg-white rounded-2xl p-6 shadow-sm border border-red-100">
-              <h3 className="font-bold text-lg mb-4 text-red-600">Danger Zone</h3>
+            <div className="rounded-2xl p-6 shadow-sm border border-red-100 bg-red-50/30">
+              <h3 className="text-lg font-bold text-red-500 mb-4 pb-2 border-b border-red-100">
+                Danger Zone
+              </h3>
               <div className="flex flex-wrap gap-3">
                 <button
                   type="button"
