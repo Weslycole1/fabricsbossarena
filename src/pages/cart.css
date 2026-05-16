@@ -91,6 +91,7 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
+  gap: 32px;
   margin-top: 12px;
 }
 
@@ -104,9 +105,8 @@
   background: #ff5c5c;
   color: white;
   border: none;
-  padding: 8px 14px;
-  border-radius: 6px;
   cursor: pointer;
+  flex-shrink: 0;
 }
 
 /* RIGHT SIDE SUMMARY */
