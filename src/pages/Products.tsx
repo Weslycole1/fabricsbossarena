@@ -1,8 +1,15 @@
 import ProductCard from "../components/ProductCard";
 import { products } from "../data/products";
 import { useTheme } from "../context/ThemeContext";
+import type { Product } from "../types/product";
 
-const Products = () => {
+interface ProductsProps {
+  wishlist: number[];
+  toggleWishlist: (id: number) => void;
+  addToCart: (product: Product) => void;
+}
+
+const Products = ({ wishlist, toggleWishlist, addToCart }: ProductsProps) => {
   const { t } = useTheme();
 
   return (
@@ -14,7 +21,9 @@ const Products = () => {
           <ProductCard
             key={product.id}
             product={product}
-            addToCart={() => {}}
+            addToCart={addToCart}
+            wishlist={wishlist}
+            toggleWishlist={toggleWishlist}
           />
         ))}
       </div>

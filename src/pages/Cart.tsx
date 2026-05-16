@@ -13,9 +13,10 @@ interface CartItem {
 interface CartProps {
   cart: CartItem[];
   setCart: React.Dispatch<React.SetStateAction<CartItem[]>>;
+  wishlistLength?: number;
 }
 
-const Cart = ({ cart, setCart }: CartProps) => {
+const Cart = ({ cart, setCart, wishlistLength = 0 }: CartProps) => {
   const { t } = useTheme();
 
   const increaseQty = (id: number) => {
@@ -58,7 +59,7 @@ const Cart = ({ cart, setCart }: CartProps) => {
 
   return (
     <div className={`min-h-screen ${t.pageBg}`}>
-      <Navbar />
+      <Navbar cartLength={cart.length} wishlistLength={wishlistLength} />
 
       <h2
         className={`text-3xl font-bold px-6 pt-8 pb-4 ${t.headingDark}`}

@@ -15,9 +15,11 @@ interface HomeProps {
   cart: (Product & { qty: number })[];
   setCart: React.Dispatch<React.SetStateAction<(Product & { qty: number })[]>>;
   addToCart: (product: Product) => void;
+  wishlist: number[];
+  toggleWishlist: (id: number) => void;
 }
 
-const Home = ({ cart, addToCart }: HomeProps) => {
+const Home = ({ cart, addToCart, wishlist, toggleWishlist }: HomeProps) => {
   const navigate = useNavigate();
   const { t } = useTheme();
 
@@ -46,7 +48,11 @@ const Home = ({ cart, addToCart }: HomeProps) => {
 
   return (
     <div className={`min-h-screen ${t.pageBg}`}>
-      <Navbar onLogout={handleLogout} />
+      <Navbar
+        onLogout={handleLogout}
+        cartLength={cart.length}
+        wishlistLength={wishlist.length}
+      />
 
       <FilterBar
         setSearch={setSearch}
@@ -57,7 +63,13 @@ const Home = ({ cart, addToCart }: HomeProps) => {
 
       <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 px-4 sm:px-6 lg:px-8 py-6 sm:py-8 max-w-7xl mx-auto">
         {filteredProducts.map((p) => (
-          <ProductCard key={p.id} product={p} addToCart={addToCart} />
+          <ProductCard
+            key={p.id}
+            product={p}
+            addToCart={addToCart}
+            wishlist={wishlist}
+            toggleWishlist={toggleWishlist}
+          />
         ))}
       </section>
 

@@ -5,11 +5,19 @@ import type { Product } from "../types/product";
 interface ProductCardProps {
   product: Product;
   addToCart: (product: Product) => void;
+  wishlist: number[];
+  toggleWishlist: (id: number) => void;
 }
 
-const ProductCard = ({ product, addToCart }: ProductCardProps) => {
+const ProductCard = ({
+  product,
+  addToCart,
+  wishlist,
+  toggleWishlist,
+}: ProductCardProps) => {
   const navigate = useNavigate();
   const { t } = useTheme();
+  const isWishlisted = wishlist.includes(product.id);
 
   const message = `Hello, I am interested in buying *${product.name}* priced at ₦${product.price.toLocaleString()}. Is it available?`;
   const whatsappURL = `https://wa.me/2348034401331?text=${encodeURIComponent(message)}`;
@@ -27,6 +35,19 @@ const ProductCard = ({ product, addToCart }: ProductCardProps) => {
           alt={product.name}
           className="h-52 w-full object-cover group-hover:scale-105 transition-transform duration-500"
         />
+
+        <button
+          type="button"
+          onClick={(e) => {
+            e.stopPropagation();
+            toggleWishlist(product.id);
+          }}
+          className="absolute top-3 left-3 bg-white/80 backdrop-blur-sm rounded-full w-9 h-9 flex items-center justify-center hover:scale-110 transition cursor-pointer shadow-sm text-base z-10"
+          aria-label={isWishlisted ? "Remove from wishlist" : "Add to wishlist"}
+        >
+          {isWishlisted ? "❤️" : "🤍"}
+        </button>
+
         <span className="absolute top-3 right-3 bg-[#C9974A] text-white text-xs font-bold px-3 py-1 rounded-full capitalize">
           {product.tag}
         </span>

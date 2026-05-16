@@ -6,9 +6,15 @@ import type { Product } from "../types/product";
 
 interface ProductDetailsProps {
   addToCart: (product: Product) => void;
+  wishlistLength?: number;
+  cartLength?: number;
 }
 
-const ProductDetails = ({ addToCart }: ProductDetailsProps) => {
+const ProductDetails = ({
+  addToCart,
+  wishlistLength = 0,
+  cartLength = 0,
+}: ProductDetailsProps) => {
   const { id } = useParams();
   const navigate = useNavigate();
   const { t } = useTheme();
@@ -33,7 +39,7 @@ const ProductDetails = ({ addToCart }: ProductDetailsProps) => {
   if (!product) {
     return (
       <div className={`min-h-screen ${t.pageBg}`}>
-        <Navbar />
+        <Navbar wishlistLength={wishlistLength} cartLength={cartLength} />
         {backButton}
         <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-12 text-center">
           <p className={t.textSecondary}>Product not found.</p>
@@ -44,7 +50,7 @@ const ProductDetails = ({ addToCart }: ProductDetailsProps) => {
 
   return (
     <div className={`min-h-screen ${t.pageBg}`}>
-      <Navbar />
+      <Navbar wishlistLength={wishlistLength} cartLength={cartLength} />
       {backButton}
 
       <main className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-12">
