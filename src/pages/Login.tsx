@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
 import fabricImage from "../assets/Untitled-design-42-2.png";
 import { useTheme } from "../context/ThemeContext";
 import { supabase } from "../lib/supabase";
@@ -16,7 +16,14 @@ const Login = () => {
   const [isSigningUp, setIsSigningUp] = useState(false);
   const [isLoggingIn, setIsLoggingIn] = useState(false);
   const navigate = useNavigate();
+  const location = useLocation();
   const { isDark, toggleTheme, t } = useTheme();
+
+  useEffect(() => {
+    if (location.pathname === "/signup") {
+      setActiveForm("signup");
+    }
+  }, [location.pathname]);
 
   const inputClass = `${t.inputBg} border ${t.border} rounded-xl px-4 py-3 w-full focus:border-[#C9974A] focus:ring-1 focus:ring-[#C9974A] outline-none ${t.textPrimary} text-sm sm:text-base`;
 

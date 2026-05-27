@@ -1,7 +1,10 @@
 import { Link } from "react-router-dom";
+import { useMemo, useState } from "react";
 import Navbar from "../components/Navbar";
 import { useTheme } from "../context/ThemeContext";
 import { useToast } from "../hooks/useToast";
+import OrderSummaryModal from "../components/OrderSummaryModal";
+import { supabase } from "../lib/supabase";
 
 interface CartItem {
   id: number;
@@ -20,6 +23,7 @@ interface CartProps {
 const Cart = ({ cart, setCart, wishlistLength = 0 }: CartProps) => {
   const { t } = useTheme();
   const { showToast } = useToast();
+  const [showOrderModal, setShowOrderModal] = useState(false);
 
   const increaseQty = (id: number) => {
     setCart((prev) =>
@@ -49,19 +53,31 @@ const Cart = ({ cart, setCart, wishlistLength = 0 }: CartProps) => {
     0
   );
 
-  const whatsappMessage = encodeURIComponent(
-    cart
-      .map(
-        (item) =>
-          `${item.name} × ${item.qty} = ₦${(
-            item.price * item.qty
-          ).toLocaleString()}`
-      )
-      .join("\n") + `\n\nTotal = ₦${totalAmount.toLocaleString()}`
+  const orderRef = useMemo(
+    () => `FBA-${Math.floor(100000 + Math.random() * 900000)}`,
+    [showOrderModal]
   );
 
-  const handleCheckout = () => {
+  const handleConfirmCheckout = async () => {
+    const itemsLine = cart
+      .map((item) => `• ${item.name} x${item.qty} — ₦${(item.price * item.qty).toLocaleString()}`)
+      .join("\n");
+    const cleanMessage = `Hello FabricsBossArena! 👋\n\n*New Order — Ref: ${orderRef}*\n\n*Items:*\n${itemsLine}\n\n*Total: ₦${totalAmount.toLocaleString()}*\n\nPlease confirm availability and delivery details. Thank you!`;
+    const whatsappUrl = `https://wa.me/2348034401331?text=${encodeURIComponent(cleanMessage)}`;
+
+    const { data } = await supabase.auth.getSession();
+    if (data.session?.user) {
+      await supabase.from("orders").insert({
+        user_id: data.session.user.id,
+        reference: orderRef,
+        total: totalAmount,
+        items: cart,
+      });
+    }
+
     showToast("Redirecting to WhatsApp... 💬", "success");
+    window.open(whatsappUrl, "_blank", "noopener,noreferrer");
+    setShowOrderModal(false);
   };
 
   return (
@@ -169,18 +185,25 @@ const Cart = ({ cart, setCart, wishlistLength = 0 }: CartProps) => {
               Grand Total: ₦{totalAmount.toLocaleString()}
             </p>
 
-            <a
-              href={`https://wa.me/2348034401331?text=${whatsappMessage}`}
-              target="_blank"
-              rel="noreferrer"
-              onClick={handleCheckout}
+            <button
+              type="button"
+              onClick={() => setShowOrderModal(true)}
               className="block bg-[#25D366] hover:bg-[#1ebe5c] text-white font-bold py-3 rounded-xl w-full text-center transition text-sm sm:text-base"
             >
               Checkout on WhatsApp
-            </a>
+            </button>
           </div>
         </div>
       )}
+
+      <OrderSummaryModal
+        isOpen={showOrderModal}
+        orderRef={orderRef}
+        items={cart}
+        totalAmount={totalAmount}
+        onClose={() => setShowOrderModal(false)}
+        onConfirm={handleConfirmCheckout}
+      />
     </div>
   );
 };

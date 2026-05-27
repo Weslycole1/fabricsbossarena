@@ -1,4 +1,4 @@
-import { Routes, Route, useLocation, useNavigate } from "react-router-dom";
+import { Routes, Route, useLocation } from "react-router-dom";
 import { useEffect, useState } from "react";
 import type { Product } from "./types/product";
 
@@ -12,14 +12,15 @@ import Wishlist from "./pages/Wishlist";
 import Account from "./pages/Account";
 import ProductDetails from "./pages/ProductDetails";
 import { supabase } from "./lib/supabase";
+import AuthModal from "./components/AuthModal";
 
 const WISHLIST_KEY = "fabricsbossarena-wishlist";
 
 function App() {
-  const navigate = useNavigate();
   const location = useLocation();
   const [cart, setCart] = useState<any[]>([]);
-  const [sessionChecked, setSessionChecked] = useState(false);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [showAuthModal, setShowAuthModal] = useState(false);
   const [wishlist, setWishlist] = useState<number[]>(() => {
     try {
       const saved = localStorage.getItem(WISHLIST_KEY);
@@ -38,22 +39,16 @@ function App() {
   }, [wishlist]);
 
   useEffect(() => {
-    const protectedPaths = ["/home", "/cart", "/account", "/wishlist"];
-    const isProtectedPath = protectedPaths.some((path) =>
-      location.pathname.startsWith(path)
-    );
+    const protectedPaths = ["/cart", "/wishlist", "/account"];
 
     const checkSession = async () => {
       const { data } = await supabase.auth.getSession();
       const hasSession = Boolean(data.session);
-      setSessionChecked(true);
-
-      if (!hasSession && isProtectedPath) {
-        navigate("/login", { replace: true });
-      }
-
-      if (hasSession && location.pathname === "/login") {
-        navigate("/home", { replace: true });
+      setIsAuthenticated(hasSession);
+      if (!hasSession && protectedPaths.some((path) => location.pathname.startsWith(path))) {
+        setShowAuthModal(true);
+      } else {
+        setShowAuthModal(false);
       }
     };
 
@@ -63,17 +58,16 @@ function App() {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((_event, session) => {
       const hasSession = Boolean(session);
-
+      setIsAuthenticated(hasSession);
       if (!hasSession && protectedPaths.some((path) => location.pathname.startsWith(path))) {
-        navigate("/login", { replace: true });
-      }
-      if (hasSession && location.pathname === "/login") {
-        navigate("/home", { replace: true });
+        setShowAuthModal(true);
+      } else {
+        setShowAuthModal(false);
       }
     });
 
     return () => subscription.unsubscribe();
-  }, [location.pathname, navigate]);
+  }, [location.pathname]);
 
   const addToCart = (product: Product, quantity = 1) => {
     setCart((prevCart) => {
@@ -104,70 +98,70 @@ function App() {
     cartLength: cart.length,
   };
 
-  if (!sessionChecked) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-[#FAF7F2] text-[#6B5B4E]">
-        Checking session...
-      </div>
-    );
-  }
-
   return (
-    <Routes>
-      <Route path="/" element={<Login />} />
-      <Route path="/login" element={<Login />} />
-      <Route
-        path="/home"
-        element={
-          <Home
-            cart={cart}
-            setCart={setCart}
-            addToCart={addToCart}
-            wishlist={wishlist}
-            toggleWishlist={toggleWishlist}
-          />
-        }
+    <>
+      <Routes>
+        <Route path="/" element={<Login />} />
+        <Route path="/login" element={<Login />} />
+        <Route path="/signup" element={<Login />} />
+        <Route
+          path="/home"
+          element={
+            <Home
+              cart={cart}
+              setCart={setCart}
+              addToCart={addToCart}
+              wishlist={wishlist}
+              toggleWishlist={toggleWishlist}
+            />
+          }
+        />
+        <Route
+          path="/cart"
+          element={<Cart cart={cart} setCart={setCart} {...sharedNav} />}
+        />
+        <Route
+          path="/wishlist"
+          element={
+            <Wishlist
+              wishlist={wishlist}
+              toggleWishlist={toggleWishlist}
+              addToCart={addToCart}
+              cartLength={cart.length}
+            />
+          }
+        />
+        <Route
+          path="/account"
+          element={
+            <Account clearWishlist={clearWishlist} {...sharedNav} />
+          }
+        />
+        <Route
+          path="/products"
+          element={
+            <Products
+              wishlist={wishlist}
+              toggleWishlist={toggleWishlist}
+              addToCart={addToCart}
+            />
+          }
+        />
+        <Route
+          path="/products/:id"
+          element={
+            <ProductDetails addToCart={addToCart} {...sharedNav} />
+          }
+        />
+        <Route path="/about" element={<About {...sharedNav} />} />
+        <Route path="/contact" element={<Contact {...sharedNav} />} />
+      </Routes>
+
+      <AuthModal
+        isOpen={!isAuthenticated && showAuthModal}
+        onClose={() => setShowAuthModal(false)}
       />
-      <Route
-        path="/cart"
-        element={<Cart cart={cart} setCart={setCart} {...sharedNav} />}
-      />
-      <Route
-        path="/wishlist"
-        element={
-          <Wishlist
-            wishlist={wishlist}
-            toggleWishlist={toggleWishlist}
-            addToCart={addToCart}
-            cartLength={cart.length}
-          />
-        }
-      />
-      <Route
-        path="/account"
-        element={
-          <Account clearWishlist={clearWishlist} {...sharedNav} />
-        }
-      />
-      <Route
-        path="/products"
-        element={
-          <Products
-            wishlist={wishlist}
-            toggleWishlist={toggleWishlist}
-            addToCart={addToCart}
-          />
-        }
-      />
-      <Route
-        path="/products/:id"
-        element={
-          <ProductDetails addToCart={addToCart} {...sharedNav} />
-        }
-      />
-      <Route path="/about" element={<About {...sharedNav} />} />
-      <Route path="/contact" element={<Contact {...sharedNav} />} />
-    </Routes>
+    </>
   );
 }
 

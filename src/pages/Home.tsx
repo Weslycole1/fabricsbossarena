@@ -9,6 +9,7 @@ import Footer from "../components/Footer";
 import { useTheme } from "../context/ThemeContext";
 import type { Product } from "../types/product";
 import { supabase } from "../lib/supabase";
+import fabricImage from "../assets/Untitled-design-42-2.png";
 
 const TAG_FILTERS = ["exclusive", "luxury", "budget", "trending"];
 
@@ -107,6 +108,41 @@ const Home = ({ cart, addToCart, wishlist, toggleWishlist }: HomeProps) => {
         wishlistLength={wishlist.length}
       />
 
+      <section
+        className="relative h-[50vh] md:h-[70vh] bg-cover bg-center md:bg-fixed"
+        style={{ backgroundImage: `url(${fabricImage})` }}
+      >
+        <div className="absolute inset-0 bg-gradient-to-b from-[#2C1810]/80 via-[#2C1810]/65 to-[#2C1810]/85" />
+        <div className="relative h-full max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col items-center justify-center text-center">
+          <p className="text-[#C9974A] tracking-[0.2em] uppercase text-sm font-semibold">
+            PREMIUM FABRICS
+          </p>
+          <h1 className="text-white text-4xl md:text-6xl font-bold mt-4">
+            Discover Fabrics That Tell Your Story
+          </h1>
+          <p className="text-white/70 mt-4 text-sm sm:text-base max-w-2xl">
+            Premium African and luxury fabrics delivered to your door
+          </p>
+          <div className="mt-7 flex flex-col sm:flex-row gap-3">
+            <button
+              type="button"
+              onClick={() =>
+                document.getElementById("products-grid")?.scrollIntoView({ behavior: "smooth" })
+              }
+              className="bg-[#C9974A] text-white rounded-full px-8 py-3 font-bold hover:bg-[#b8863a] transition"
+            >
+              Shop Now
+            </button>
+            <Link
+              to="/about"
+              className="border border-white text-white rounded-full px-8 py-3 font-bold hover:bg-white/10 transition"
+            >
+              Our Story
+            </Link>
+          </div>
+        </div>
+      </section>
+
       {/* New Arrivals Banner */}
       <section className="px-4 sm:px-6 lg:px-8 py-6 max-w-7xl mx-auto">
         <div className="rounded-2xl bg-gradient-to-r from-[#2C1810] to-[#C9974A] px-6 sm:px-8 py-8 flex flex-col md:flex-row items-center justify-between gap-6 overflow-hidden">
@@ -173,7 +209,10 @@ const Home = ({ cart, addToCart, wishlist, toggleWishlist }: HomeProps) => {
         </div>
       )}
 
-      <section className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 px-4 sm:px-6 lg:px-8 py-6 sm:py-8 max-w-7xl mx-auto">
+      <section
+        id="products-grid"
+        className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 px-4 sm:px-6 lg:px-8 py-6 sm:py-8 max-w-7xl mx-auto"
+      >
         {loading
           ? Array.from({ length: 6 }).map((_, i) => <SkeletonCard key={i} />)
           : filteredProducts.map((p) => (
