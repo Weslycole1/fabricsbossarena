@@ -6,9 +6,9 @@ import FilterBar from "../components/FilterBar";
 import ProductCard from "../components/ProductCard";
 import SkeletonCard from "../components/SkeletonCard";
 import Footer from "../components/Footer";
-import { products } from "../data/products";
 import { useTheme } from "../context/ThemeContext";
 import type { Product } from "../types/product";
+import { supabase } from "../lib/supabase";
 
 const TAG_FILTERS = ["exclusive", "luxury", "budget", "trending"];
 
@@ -20,18 +20,63 @@ interface HomeProps {
   toggleWishlist: (id: number) => void;
 }
 
+type DbProduct = {
+  id: number | string;
+  name: string;
+  price: number | string;
+  category: string;
+  tag: string;
+  img: string;
+  description?: string | null;
+  desc?: string | null;
+};
+
 const Home = ({ cart, addToCart, wishlist, toggleWishlist }: HomeProps) => {
   const navigate = useNavigate();
   const { t } = useTheme();
 
+  const [products, setProducts] = useState<Product[]>([]);
   const [search, setSearch] = useState("");
   const [category, setCategory] = useState("all");
   const [sort, setSort] = useState("");
   const [loading, setLoading] = useState(true);
+  const [fetchError, setFetchError] = useState("");
 
   useEffect(() => {
-    const timer = setTimeout(() => setLoading(false), 1000);
-    return () => clearTimeout(timer);
+    let mounted = true;
+
+    const fetchProducts = async () => {
+      setLoading(true);
+      setFetchError("");
+      const { data, error } = await supabase.from("products").select("*");
+
+      if (!mounted) return;
+
+      if (error) {
+        setFetchError(error.message);
+        setProducts([]);
+        setLoading(false);
+        return;
+      }
+
+      const mappedProducts: Product[] = ((data ?? []) as DbProduct[]).map((item) => ({
+        id: Number(item.id),
+        name: String(item.name),
+        price: Number(item.price),
+        category: String(item.category),
+        tag: String(item.tag),
+        img: String(item.img),
+        desc: String(item.description ?? item.desc ?? ""),
+      }));
+
+      setProducts(mappedProducts);
+      setLoading(false);
+    };
+
+    void fetchProducts();
+    return () => {
+      mounted = false;
+    };
   }, []);
 
   const handleLogout = () => {
@@ -101,7 +146,7 @@ const Home = ({ cart, addToCart, wishlist, toggleWishlist }: HomeProps) => {
         setSort={setSort}
       />
 
-      {!loading && filteredProducts.length === 0 && (
+      {!loading && !fetchError && filteredProducts.length === 0 && (
         <div className="text-center py-12 px-4">
           <p className={`${t.textSecondary} text-base sm:text-lg mb-4`}>
             No fabrics found for your search 😔
@@ -117,6 +162,14 @@ const Home = ({ cart, addToCart, wishlist, toggleWishlist }: HomeProps) => {
           >
             Clear Search
           </button>
+        </div>
+      )}
+
+      {!loading && fetchError && (
+        <div className="text-center py-6 px-4">
+          <p className="text-red-500 text-sm sm:text-base">
+            Failed to load products: {fetchError}
+          </p>
         </div>
       )}
 

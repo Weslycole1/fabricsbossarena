@@ -2,21 +2,71 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import fabricImage from "../assets/Untitled-design-42-2.png";
 import { useTheme } from "../context/ThemeContext";
+import { supabase } from "../lib/supabase";
 
 const Login = () => {
   const [activeForm, setActiveForm] = useState<"signup" | "login">("signup");
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
+  const [signupEmail, setSignupEmail] = useState("");
+  const [signupPassword, setSignupPassword] = useState("");
+  const [loginEmail, setLoginEmail] = useState("");
+  const [loginPassword, setLoginPassword] = useState("");
+  const [authError, setAuthError] = useState("");
+  const [isSigningUp, setIsSigningUp] = useState(false);
+  const [isLoggingIn, setIsLoggingIn] = useState(false);
   const navigate = useNavigate();
   const { isDark, toggleTheme, t } = useTheme();
 
   const inputClass = `${t.inputBg} border ${t.border} rounded-xl px-4 py-3 w-full focus:border-[#C9974A] focus:ring-1 focus:ring-[#C9974A] outline-none ${t.textPrimary} text-sm sm:text-base`;
 
-  const handleLogin = (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
+    setAuthError("");
+    setIsLoggingIn(true);
+
+    const { error } = await supabase.auth.signInWithPassword({
+      email: loginEmail,
+      password: loginPassword,
+    });
+
+    setIsLoggingIn(false);
+    if (error) {
+      setAuthError(error.message);
+      return;
+    }
     navigate("/home");
   };
 
-  const handleSignup = (e: React.FormEvent) => {
+  const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
+    setAuthError("");
+    setIsSigningUp(true);
+
+    const { data, error } = await supabase.auth.signUp({
+      email: signupEmail,
+      password: signupPassword,
+    });
+
+    if (error || !data.user) {
+      setIsSigningUp(false);
+      setAuthError(error?.message ?? "Unable to create account.");
+      return;
+    }
+
+    const { error: profileError } = await supabase.from("profiles").insert({
+      id: data.user.id,
+      email: signupEmail,
+      first_name: firstName,
+      last_name: lastName,
+    });
+
+    setIsSigningUp(false);
+    if (profileError) {
+      setAuthError(profileError.message);
+      return;
+    }
+
     navigate("/home");
   };
 
@@ -79,7 +129,10 @@ const Login = () => {
           <div className="flex gap-2 mb-6">
             <button
               type="button"
-              onClick={() => setActiveForm("signup")}
+              onClick={() => {
+                setActiveForm("signup");
+                setAuthError("");
+              }}
               className={`flex-1 py-2.5 rounded-xl text-sm sm:text-base font-semibold transition ${
                 activeForm === "signup"
                   ? t.loginToggleActive
@@ -90,7 +143,10 @@ const Login = () => {
             </button>
             <button
               type="button"
-              onClick={() => setActiveForm("login")}
+              onClick={() => {
+                setActiveForm("login");
+                setAuthError("");
+              }}
               className={`flex-1 py-2.5 rounded-xl text-sm sm:text-base font-semibold transition ${
                 activeForm === "login"
                   ? t.loginToggleActive
@@ -101,6 +157,12 @@ const Login = () => {
             </button>
           </div>
 
+          {authError && (
+            <p className="mb-4 text-sm text-red-500 bg-red-50 border border-red-200 rounded-xl px-3 py-2">
+              {authError}
+            </p>
+          )}
+
           {activeForm === "signup" ? (
             <form onSubmit={handleSignup} className="flex flex-col gap-3">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -108,12 +170,16 @@ const Login = () => {
                   type="text"
                   placeholder="First Name"
                   required
+                  value={firstName}
+                  onChange={(e) => setFirstName(e.target.value)}
                   className={inputClass}
                 />
                 <input
                   type="text"
                   placeholder="Surname"
                   required
+                  value={lastName}
+                  onChange={(e) => setLastName(e.target.value)}
                   className={inputClass}
                 />
               </div>
@@ -121,19 +187,24 @@ const Login = () => {
                 type="email"
                 placeholder="Email Address"
                 required
+                value={signupEmail}
+                onChange={(e) => setSignupEmail(e.target.value)}
                 className={inputClass}
               />
               <input
                 type="password"
                 placeholder="Password"
                 required
+                value={signupPassword}
+                onChange={(e) => setSignupPassword(e.target.value)}
                 className={inputClass}
               />
               <button
                 type="submit"
+                disabled={isSigningUp}
                 className="mt-2 bg-[#C9974A] hover:bg-[#b8863a] text-white font-bold rounded-xl py-3 w-full transition text-sm sm:text-base"
               >
-                Sign Up
+                {isSigningUp ? "Signing up..." : "Sign Up"}
               </button>
             </form>
           ) : (
@@ -142,12 +213,16 @@ const Login = () => {
                 type="email"
                 placeholder="Email Address"
                 required
+                value={loginEmail}
+                onChange={(e) => setLoginEmail(e.target.value)}
                 className={inputClass}
               />
               <input
                 type="password"
                 placeholder="Password"
                 required
+                value={loginPassword}
+                onChange={(e) => setLoginPassword(e.target.value)}
                 className={inputClass}
               />
               <div
@@ -163,9 +238,10 @@ const Login = () => {
               </div>
               <button
                 type="submit"
+                disabled={isLoggingIn}
                 className="mt-2 bg-[#C9974A] hover:bg-[#b8863a] text-white font-bold rounded-xl py-3 w-full transition text-sm sm:text-base"
               >
-                Login
+                {isLoggingIn ? "Logging in..." : "Login"}
               </button>
             </form>
           )}

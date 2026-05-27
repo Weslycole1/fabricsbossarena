@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useTheme } from "../context/ThemeContext";
+import { supabase } from "../lib/supabase";
 
 interface NavbarProps {
   onLogout?: () => void;
@@ -22,12 +23,10 @@ const Navbar = ({ onLogout, cartLength = 0, wishlistLength = 0 }: NavbarProps) =
 
   const isActive = (path: string) => location.pathname === path;
 
-  const handleLogout = () => {
-    if (onLogout) {
-      onLogout();
-    } else {
-      navigate("/login");
-    }
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
+    if (onLogout) onLogout();
+    else navigate("/login");
     setMenuOpen(false);
   };
 
