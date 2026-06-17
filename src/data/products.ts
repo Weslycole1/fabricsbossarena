@@ -10,7 +10,7 @@ export const products: Product[] = [
     price: 25000, 
     category: 'silk', 
     tag: 'luxury', 
-    img: fabric1, 
+    img_url: fabric1, 
     desc: 'Luxurious silk fabric with soft elegance for premium outfits.' 
   },
   { 
@@ -19,7 +19,7 @@ export const products: Product[] = [
     price: 30000, 
     category: 'velvet', 
     tag: 'exclusive', 
-    img: fabric3, 
+    img_url: fabric3, 
     desc: 'Premium velvet with a timeless shine — perfect for luxury wears.' 
   },
   { 
@@ -28,7 +28,7 @@ export const products: Product[] = [
     price: 12500, 
     category: 'ankara', 
     tag: 'trending', 
-    img: fabric2, 
+    img_url: fabric2, 
     desc: 'Vibrant African print with bold golden accents — bright and beautiful.' 
   },
   { 
@@ -37,7 +37,7 @@ export const products: Product[] = [
     price: 8000, 
     category: 'chiffon', 
     tag: 'budget', 
-    img: fabric1, 
+    img_url: fabric1, 
     desc: 'Light and flowy chiffon perfect for elegant evening wear.' 
   },
   { 
@@ -46,7 +46,7 @@ export const products: Product[] = [
     price: 45000, 
     category: 'lace', 
     tag: 'exclusive', 
-    img: fabric2, 
+    img_url: fabric2, 
     desc: 'Premium lace fabric with intricate patterns for special occasions.' 
   },
   { 
@@ -55,7 +55,7 @@ export const products: Product[] = [
     price: 9500, 
     category: 'ankara', 
     tag: 'trending', 
-    img: fabric3, 
+    img_url: fabric3, 
     desc: 'Bold African prints that celebrate culture and style.' 
   },
 ]

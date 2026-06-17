@@ -1,10 +1,13 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import Navbar from "../components/Navbar";
-import { products } from "../data/products";
+import LoadingSpinner from "../components/LoadingSpinner";
 import { useTheme } from "../context/ThemeContext";
 import { useToast } from "../hooks/useToast";
-import type { Product } from "../types/product";
+import type { Product, DbProduct } from "../types/product";
+import { supabase } from "../lib/supabase";
+import { mapDbProduct } from "../utils/mapProduct";
+import { resolveImageUrl } from "../data/imageMap";
 
 interface ProductDetailsProps {
   addToCart: (product: Product, quantity?: number) => void;
@@ -22,8 +25,40 @@ const ProductDetails = ({
   const { t } = useTheme();
   const { showToast } = useToast();
   const [quantity, setQuantity] = useState(1);
+  const [product, setProduct] = useState<Product | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [fetchError, setFetchError] = useState("");
 
-  const product = products.find((p) => p.id === Number(id));
+  useEffect(() => {
+    let mounted = true;
+
+    const fetchProduct = async () => {
+      setLoading(true);
+      setFetchError("");
+      const { data, error } = await supabase
+        .from("products")
+        .select("*")
+        .eq("id", Number(id))
+        .single();
+
+      if (!mounted) return;
+
+      if (error || !data) {
+        setFetchError(error?.message ?? "Product not found.");
+        setProduct(null);
+        setLoading(false);
+        return;
+      }
+
+      setProduct(mapDbProduct(data as DbProduct));
+      setLoading(false);
+    };
+
+    void fetchProduct();
+    return () => {
+      mounted = false;
+    };
+  }, [id]);
 
   const message = product
     ? `Hello, I am interested in buying *${product.name}* priced at ₦${product.price.toLocaleString()}. Is it available?`
@@ -33,8 +68,8 @@ const ProductDetails = ({
   const backButton = (
     <button
       type="button"
-      onClick={() => navigate("/home")}
-      className={`${t.backBtn} mx-4 sm:mx-6 mt-4 text-xs sm:text-sm`}
+      onClick={() => navigate("/products")}
+      className={`${t.backBtn} mx-4 sm:px-6 mt-4 text-xs sm:text-sm`}
     >
       ← Back to Shop
     </button>
@@ -46,13 +81,23 @@ const ProductDetails = ({
     showToast("Added to cart! 🛒", "success");
   };
 
+  if (loading) {
+    return (
+      <div className={`min-h-screen overflow-x-hidden ${t.pageBg}`}>
+        <Navbar wishlistLength={wishlistLength} cartLength={cartLength} />
+        {backButton}
+        <LoadingSpinner label="Loading product..." />
+      </div>
+    );
+  }
+
   if (!product) {
     return (
       <div className={`min-h-screen overflow-x-hidden ${t.pageBg}`}>
         <Navbar wishlistLength={wishlistLength} cartLength={cartLength} />
         {backButton}
         <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-12 text-center">
-          <p className={t.textSecondary}>Product not found.</p>
+          <p className={t.textSecondary}>{fetchError || "Product not found."}</p>
         </div>
       </div>
     );
@@ -65,7 +110,7 @@ const ProductDetails = ({
 
       <main className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-12">
         <img
-          src={product.img}
+          src={resolveImageUrl(product.img_url)}
           alt={product.name}
           className="rounded-2xl overflow-hidden shadow-md w-full h-64 md:h-96 object-cover"
         />
@@ -93,7 +138,6 @@ const ProductDetails = ({
             {product.desc}
           </p>
 
-          {/* Quantity selector */}
           <div className="mb-6">
             <p className={`text-sm font-medium mb-3 ${t.textSecondary}`}>
               Quantity

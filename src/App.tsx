@@ -39,7 +39,7 @@ function App() {
   }, [wishlist]);
 
   useEffect(() => {
-    const protectedPaths = ["/cart", "/wishlist", "/account"];
+    const protectedPaths = ["/wishlist", "/account"];
 
     const checkSession = async () => {
       const { data } = await supabase.auth.getSession();
@@ -144,6 +144,7 @@ function App() {
               wishlist={wishlist}
               toggleWishlist={toggleWishlist}
               addToCart={addToCart}
+              cartLength={cart.length}
             />
           }
         />
@@ -160,6 +161,7 @@ function App() {
       <AuthModal
         isOpen={!isAuthenticated && showAuthModal}
         onClose={() => setShowAuthModal(false)}
+        onSuccess={() => setShowAuthModal(false)}
       />
     </>
   );

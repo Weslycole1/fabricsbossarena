@@ -5,10 +5,13 @@ import Navbar from "../components/Navbar";
 import FilterBar from "../components/FilterBar";
 import ProductCard from "../components/ProductCard";
 import SkeletonCard from "../components/SkeletonCard";
+import LoadingSpinner from "../components/LoadingSpinner";
 import Footer from "../components/Footer";
 import { useTheme } from "../context/ThemeContext";
-import type { Product } from "../types/product";
+import type { Product, DbProduct } from "../types/product";
 import { supabase } from "../lib/supabase";
+import { mapDbProduct } from "../utils/mapProduct";
+import { resolveImageUrl } from "../data/imageMap";
 import fabricImage from "../assets/Untitled-design-42-2.png";
 
 const TAG_FILTERS = ["exclusive", "luxury", "budget", "trending"];
@@ -20,17 +23,6 @@ interface HomeProps {
   wishlist: number[];
   toggleWishlist: (id: number) => void;
 }
-
-type DbProduct = {
-  id: number | string;
-  name: string;
-  price: number | string;
-  category: string;
-  tag: string;
-  img: string;
-  description?: string | null;
-  desc?: string | null;
-};
 
 const Home = ({ cart, addToCart, wishlist, toggleWishlist }: HomeProps) => {
   const navigate = useNavigate();
@@ -60,15 +52,7 @@ const Home = ({ cart, addToCart, wishlist, toggleWishlist }: HomeProps) => {
         return;
       }
 
-      const mappedProducts: Product[] = ((data ?? []) as DbProduct[]).map((item) => ({
-        id: Number(item.id),
-        name: String(item.name),
-        price: Number(item.price),
-        category: String(item.category),
-        tag: String(item.tag),
-        img: String(item.img),
-        desc: String(item.description ?? item.desc ?? ""),
-      }));
+      const mappedProducts: Product[] = ((data ?? []) as DbProduct[]).map(mapDbProduct);
 
       setProducts(mappedProducts);
       setLoading(false);
@@ -167,7 +151,7 @@ const Home = ({ cart, addToCart, wishlist, toggleWishlist }: HomeProps) => {
             {newArrivals.map((p, i) => (
               <img
                 key={p.id}
-                src={p.img}
+                src={resolveImageUrl(p.img_url)}
                 alt={p.name}
                 className={`w-12 h-12 rounded-full border-2 border-white object-cover ${i > 0 ? "-ml-3" : ""}`}
               />
@@ -182,7 +166,22 @@ const Home = ({ cart, addToCart, wishlist, toggleWishlist }: HomeProps) => {
         setSort={setSort}
       />
 
-      {!loading && !fetchError && filteredProducts.length === 0 && (
+      {loading && (
+        <div className="max-w-7xl mx-auto">
+          <LoadingSpinner label="Loading fabrics..." />
+        </div>
+      )}
+
+      {!loading && !fetchError && products.length === 0 && (
+        <div className="text-center py-12 px-4">
+          <p className="text-5xl mb-4">🧵</p>
+          <p className={`${t.textSecondary} text-base sm:text-lg`}>
+            No products available yet. Check back soon!
+          </p>
+        </div>
+      )}
+
+      {!loading && !fetchError && products.length > 0 && filteredProducts.length === 0 && (
         <div className="text-center py-12 px-4">
           <p className={`${t.textSecondary} text-base sm:text-lg mb-4`}>
             No fabrics found for your search 😔

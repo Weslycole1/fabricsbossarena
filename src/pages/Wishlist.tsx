@@ -1,10 +1,13 @@
 import { Link, useNavigate } from "react-router-dom";
+import { useEffect, useState } from "react";
 import Navbar from "../components/Navbar";
 import ProductCard from "../components/ProductCard";
 import Footer from "../components/Footer";
-import { products } from "../data/products";
+import LoadingSpinner from "../components/LoadingSpinner";
 import { useTheme } from "../context/ThemeContext";
-import type { Product } from "../types/product";
+import type { Product, DbProduct } from "../types/product";
+import { supabase } from "../lib/supabase";
+import { mapDbProduct } from "../utils/mapProduct";
 
 interface WishlistProps {
   wishlist: number[];
@@ -21,6 +24,24 @@ const Wishlist = ({
 }: WishlistProps) => {
   const navigate = useNavigate();
   const { t } = useTheme();
+  const [products, setProducts] = useState<Product[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    let mounted = true;
+
+    const fetchProducts = async () => {
+      const { data } = await supabase.from("products").select("*");
+      if (!mounted) return;
+      setProducts(((data ?? []) as DbProduct[]).map(mapDbProduct));
+      setLoading(false);
+    };
+
+    void fetchProducts();
+    return () => {
+      mounted = false;
+    };
+  }, []);
 
   const savedProducts = products.filter((p) => wishlist.includes(p.id));
 
@@ -41,7 +62,9 @@ const Wishlist = ({
           My Wishlist
         </h1>
 
-        {savedProducts.length === 0 ? (
+        {loading ? (
+          <LoadingSpinner label="Loading wishlist..." />
+        ) : savedProducts.length === 0 ? (
           <div
             className={`${t.cardBg} rounded-2xl p-12 shadow-sm border ${t.border} text-center max-w-md mx-auto`}
           >
@@ -53,7 +76,7 @@ const Wishlist = ({
               Tap the heart on any fabric to save it here
             </p>
             <Link
-              to="/home"
+              to="/products"
               className="inline-block bg-[#C9974A] hover:bg-[#b8863a] text-white font-semibold px-8 py-3 rounded-xl transition"
             >
               Explore Fabrics

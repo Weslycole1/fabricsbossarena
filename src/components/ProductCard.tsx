@@ -1,11 +1,8 @@
-import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useTheme } from "../context/ThemeContext";
 import { useToast } from "../hooks/useToast";
 import type { Product } from "../types/product";
-import { imageMap } from "../data/imageMap";
-import { supabase } from "../lib/supabase";
-import AuthModal from "./AuthModal";
+import { resolveImageUrl } from "../data/imageMap";
 
 interface ProductCardProps {
   product: Product;
@@ -24,12 +21,10 @@ const ProductCard = ({
   const { t } = useTheme();
   const { showToast } = useToast();
   const isWishlisted = wishlist.includes(product.id);
-  const [showAuthModal, setShowAuthModal] = useState(false);
-  const [pendingAddToCart, setPendingAddToCart] = useState(false);
 
   const message = `Hello, I am interested in buying *${product.name}* priced at ₦${product.price.toLocaleString()}. Is it available?`;
   const whatsappURL = `https://wa.me/2348034401331?text=${encodeURIComponent(message)}`;
-  const imgSrc = imageMap[product.img] || product.img;
+  const imgSrc = resolveImageUrl(product.img_url);
 
   const handleWishlistClick = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -42,28 +37,16 @@ const ProductCard = ({
     }
   };
 
-  const addItemToCart = () => {
+  const handleAddToCart = (e: React.MouseEvent) => {
+    e.stopPropagation();
     addToCart(product, 1);
     showToast("Added to cart! 🛒", "success");
   };
 
-  const handleAddToCart = async (e: React.MouseEvent) => {
-    e.stopPropagation();
-    const { data } = await supabase.auth.getSession();
-    if (data.session) {
-      addItemToCart();
-      return;
-    }
-
-    setPendingAddToCart(true);
-    setShowAuthModal(true);
-  };
-
   return (
-    <>
-      <div
-        className={`${t.cardBg} rounded-2xl overflow-hidden shadow-sm hover:shadow-lg transition-all duration-300 hover:-translate-y-1 flex flex-col border ${t.border} h-full w-full group`}
-      >
+    <div
+      className={`${t.cardBg} rounded-2xl overflow-hidden shadow-sm hover:shadow-lg transition-all duration-300 hover:-translate-y-1 flex flex-col border ${t.border} h-full w-full group`}
+    >
       <div
         className="relative overflow-hidden h-48 md:h-52 cursor-pointer"
         onClick={() => navigate(`/products/${product.id}`)}
@@ -119,24 +102,7 @@ const ProductCard = ({
           </a>
         </div>
       </div>
-      </div>
-
-      <AuthModal
-        isOpen={showAuthModal}
-        message="Sign in to add items to your cart"
-        onClose={() => {
-          setShowAuthModal(false);
-          setPendingAddToCart(false);
-        }}
-        onSuccess={() => {
-          setShowAuthModal(false);
-          if (pendingAddToCart) {
-            addItemToCart();
-            setPendingAddToCart(false);
-          }
-        }}
-      />
-    </>
+    </div>
   );
 };
 

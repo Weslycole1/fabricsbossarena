@@ -1,5 +1,7 @@
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { useTheme } from "../context/ThemeContext";
+import { useToast } from "../hooks/useToast";
 import { supabase } from "../lib/supabase";
 
 interface AuthModalProps {
@@ -7,10 +9,19 @@ interface AuthModalProps {
   onClose: () => void;
   onSuccess?: () => void;
   message?: string;
+  redirectTo?: string;
 }
 
-const AuthModal = ({ isOpen, onClose, onSuccess, message }: AuthModalProps) => {
+const AuthModal = ({
+  isOpen,
+  onClose,
+  onSuccess,
+  message,
+  redirectTo = "/products",
+}: AuthModalProps) => {
   const { t } = useTheme();
+  const { showToast } = useToast();
+  const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState<"login" | "signup">("login");
   const [error, setError] = useState("");
   const [isLoggingIn, setIsLoggingIn] = useState(false);
@@ -41,6 +52,16 @@ const AuthModal = ({ isOpen, onClose, onSuccess, message }: AuthModalProps) => {
     onClose();
   };
 
+  const handleAuthSuccess = (toastMessage: string) => {
+    showToast(toastMessage, "success");
+    closeModal();
+    if (onSuccess) {
+      onSuccess();
+    } else {
+      navigate(redirectTo);
+    }
+  };
+
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
@@ -57,8 +78,7 @@ const AuthModal = ({ isOpen, onClose, onSuccess, message }: AuthModalProps) => {
       return;
     }
 
-    closeModal();
-    onSuccess?.();
+    handleAuthSuccess("Welcome back! 🎉");
   };
 
   const handleSignup = async (e: React.FormEvent) => {
@@ -90,8 +110,7 @@ const AuthModal = ({ isOpen, onClose, onSuccess, message }: AuthModalProps) => {
       return;
     }
 
-    closeModal();
-    onSuccess?.();
+    handleAuthSuccess("Account created successfully! 🎉");
   };
 
   return (

@@ -7,3 +7,5 @@ export const imageMap: Record<string, string> = {
   '/assets/Ankara.jpeg': ankara,
   '/assets/velvet.jpeg': velvet,
 }
+
+export const resolveImageUrl = (imgUrl: string) => imageMap[imgUrl] || imgUrl

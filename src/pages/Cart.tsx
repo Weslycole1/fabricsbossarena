@@ -3,14 +3,15 @@ import { useMemo, useState } from "react";
 import Navbar from "../components/Navbar";
 import { useTheme } from "../context/ThemeContext";
 import { useToast } from "../hooks/useToast";
-import OrderSummaryModal from "../components/OrderSummaryModal";
+import OrderSummaryModal, { type CheckoutDetails } from "../components/OrderSummaryModal";
+import { resolveImageUrl } from "../data/imageMap";
 import { supabase } from "../lib/supabase";
 
 interface CartItem {
   id: number;
   name: string;
   price: number;
-  img: string;
+  img_url: string;
   qty: number;
 }
 
@@ -58,24 +59,48 @@ const Cart = ({ cart, setCart, wishlistLength = 0 }: CartProps) => {
     [showOrderModal]
   );
 
-  const handleConfirmCheckout = async () => {
+  const handleConfirmCheckout = async (details: CheckoutDetails) => {
     const itemsLine = cart
       .map((item) => `• ${item.name} x${item.qty} — ₦${(item.price * item.qty).toLocaleString()}`)
       .join("\n");
-    const cleanMessage = `Hello FabricsBossArena! 👋\n\n*New Order — Ref: ${orderRef}*\n\n*Items:*\n${itemsLine}\n\n*Total: ₦${totalAmount.toLocaleString()}*\n\nPlease confirm availability and delivery details. Thank you!`;
+
+    const cleanMessage = `Hello FabricsBossArena! 👋
+
+*New Order — Ref: ${orderRef}*
+
+*Customer:*
+Name: ${details.name}
+Phone: ${details.phone}
+Address: ${details.address}
+
+*Items:*
+${itemsLine}
+
+*Total: ₦${totalAmount.toLocaleString()}*
+
+Please confirm availability and delivery details. Thank you!`;
+
     const whatsappUrl = `https://wa.me/2348034401331?text=${encodeURIComponent(cleanMessage)}`;
 
     const { data } = await supabase.auth.getSession();
-    if (data.session?.user) {
-      await supabase.from("orders").insert({
-        user_id: data.session.user.id,
-        reference: orderRef,
-        total: totalAmount,
-        items: cart,
-      });
+    const orderPayload = {
+      user_id: data.session?.user?.id ?? null,
+      reference: orderRef,
+      total: totalAmount,
+      items: cart,
+      status: "pending",
+      customer_name: details.name,
+      customer_address: details.address,
+      customer_phone: details.phone,
+    };
+
+    const { error } = await supabase.from("orders").insert(orderPayload);
+    if (error) {
+      showToast(`Order save failed: ${error.message}`, "error");
+      return;
     }
 
-    showToast("Redirecting to WhatsApp... 💬", "success");
+    showToast("Order placed! Redirecting to WhatsApp... 💬", "success");
     window.open(whatsappUrl, "_blank", "noopener,noreferrer");
     setShowOrderModal(false);
   };
@@ -100,7 +125,7 @@ const Cart = ({ cart, setCart, wishlistLength = 0 }: CartProps) => {
             Looks like you haven&apos;t added anything yet
           </p>
           <Link
-            to="/home"
+            to="/products"
             className="inline-block bg-[#C9974A] text-white rounded-xl px-8 py-3 font-semibold hover:bg-[#b8863a] transition"
           >
             Browse Fabrics
@@ -115,7 +140,7 @@ const Cart = ({ cart, setCart, wishlistLength = 0 }: CartProps) => {
                 className={`${t.cardBg} rounded-2xl p-4 flex gap-4 items-start shadow-sm border ${t.border}`}
               >
                 <img
-                  src={item.img}
+                  src={resolveImageUrl(item.img_url)}
                   alt={item.name}
                   className="w-16 h-16 md:w-24 md:h-24 rounded-xl object-cover flex-shrink-0"
                 />

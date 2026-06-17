@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import fabricImage from "../assets/Untitled-design-42-2.png";
 import { useTheme } from "../context/ThemeContext";
+import { useToast } from "../hooks/useToast";
 import { supabase } from "../lib/supabase";
 
 const Login = () => {
@@ -18,6 +19,7 @@ const Login = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { isDark, toggleTheme, t } = useTheme();
+  const { showToast } = useToast();
 
   useEffect(() => {
     if (location.pathname === "/signup") {
@@ -42,7 +44,9 @@ const Login = () => {
       setAuthError(error.message);
       return;
     }
-    navigate("/home");
+
+    showToast("Welcome back! 🎉", "success");
+    navigate("/products");
   };
 
   const handleSignup = async (e: React.FormEvent) => {
@@ -74,12 +78,12 @@ const Login = () => {
       return;
     }
 
-    navigate("/home");
+    showToast("Account created successfully! 🎉", "success");
+    navigate("/products");
   };
 
   return (
     <div className={`min-h-screen overflow-x-hidden flex flex-col lg:flex-row ${t.pageBg}`}>
-      {/* Mobile premium banner */}
       <div className="lg:hidden relative h-32 w-full flex-shrink-0">
         <img
           src={fabricImage}
@@ -94,7 +98,6 @@ const Login = () => {
         </div>
       </div>
 
-      {/* Desktop left hero */}
       <div className="hidden lg:flex lg:w-1/2 relative min-h-screen">
         <img
           src={fabricImage}
@@ -113,7 +116,6 @@ const Login = () => {
         </div>
       </div>
 
-      {/* Form panel */}
       <div
         className={`flex-1 ${t.pageBg} flex items-center justify-center px-4 sm:px-6 lg:px-8 py-8 sm:py-10 lg:py-12 relative`}
       >
@@ -209,7 +211,7 @@ const Login = () => {
               <button
                 type="submit"
                 disabled={isSigningUp}
-                className="mt-2 bg-[#C9974A] hover:bg-[#b8863a] text-white font-bold rounded-xl py-3 w-full transition text-sm sm:text-base"
+                className="mt-2 bg-[#C9974A] hover:bg-[#b8863a] text-white font-bold rounded-xl py-3 w-full transition text-sm sm:text-base disabled:opacity-70"
               >
                 {isSigningUp ? "Signing up..." : "Sign Up"}
               </button>
@@ -246,7 +248,7 @@ const Login = () => {
               <button
                 type="submit"
                 disabled={isLoggingIn}
-                className="mt-2 bg-[#C9974A] hover:bg-[#b8863a] text-white font-bold rounded-xl py-3 w-full transition text-sm sm:text-base"
+                className="mt-2 bg-[#C9974A] hover:bg-[#b8863a] text-white font-bold rounded-xl py-3 w-full transition text-sm sm:text-base disabled:opacity-70"
               >
                 {isLoggingIn ? "Logging in..." : "Login"}
               </button>
