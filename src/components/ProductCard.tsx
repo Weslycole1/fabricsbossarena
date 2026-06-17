@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { useTheme } from "../context/ThemeContext";
 import { useToast } from "../hooks/useToast";
 import type { Product } from "../types/product";
+import { imageMap } from "../data/imageMap";
 import { supabase } from "../lib/supabase";
 import AuthModal from "./AuthModal";
 
@@ -28,6 +29,7 @@ const ProductCard = ({
 
   const message = `Hello, I am interested in buying *${product.name}* priced at ₦${product.price.toLocaleString()}. Is it available?`;
   const whatsappURL = `https://wa.me/2348034401331?text=${encodeURIComponent(message)}`;
+  const imgSrc = imageMap[product.img] || product.img;
 
   const handleWishlistClick = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -67,7 +69,7 @@ const ProductCard = ({
         onClick={() => navigate(`/products/${product.id}`)}
       >
         <img
-          src={product.img}
+          src={imgSrc}
           alt={product.name}
           className="h-48 md:h-52 w-full object-cover group-hover:scale-105 transition-transform duration-500"
         />
