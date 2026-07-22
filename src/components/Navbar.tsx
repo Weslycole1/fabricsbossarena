@@ -2,7 +2,6 @@ import { useEffect, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useTheme } from "../context/ThemeContext";
 import { supabase } from "../lib/supabase";
-import AuthModal from "./AuthModal";
 
 interface NavbarProps {
   onLogout?: () => void;
@@ -22,7 +21,6 @@ const Navbar = ({ onLogout, cartLength = 0, wishlistLength = 0 }: NavbarProps) =
   const navigate = useNavigate();
   const [menuOpen, setMenuOpen] = useState(false);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [showAuthModal, setShowAuthModal] = useState(false);
 
   useEffect(() => {
     const setupAuth = async () => {
@@ -35,7 +33,7 @@ const Navbar = ({ onLogout, cartLength = 0, wishlistLength = 0 }: NavbarProps) =
     } = supabase.auth.onAuthStateChange((_event, session) => {
       setIsAuthenticated(Boolean(session));
     });
-    return () => subscription.unsubscribe();
+    return () => subscription.unsubscribe(); 
   }, []);
 
   const isActive = (path: string) => location.pathname === path;
@@ -99,13 +97,24 @@ const Navbar = ({ onLogout, cartLength = 0, wishlistLength = 0 }: NavbarProps) =
                 </Link>
               </>
             ) : (
-              <button
-                type="button"
-                onClick={() => setShowAuthModal(true)}
-                className="border border-[#C9974A] text-[#C9974A] rounded-full px-4 py-1.5 text-sm hover:bg-[#C9974A] hover:text-white transition"
-              >
-                Login
-              </button>
+              <>
+                <Link
+                  to="/login"
+                  state={{ from: location }}
+                  onClick={() => setMenuOpen(false)}
+                  className="border border-[#C9974A] text-[#C9974A] rounded-full px-4 py-1.5 text-sm hover:bg-[#C9974A] hover:text-white transition"
+                >
+                  Login
+                </Link>
+                <Link
+                  to="/signup"
+                  state={{ from: location }}
+                  onClick={() => setMenuOpen(false)}
+                  className="hidden sm:block bg-[#C9974A] text-white rounded-full px-4 py-1.5 text-sm hover:bg-[#b8863a] transition"
+                >
+                  Sign Up
+                </Link>
+              </>
             )}
 
             <Link to="/cart" className={iconBtn} title="Cart">
@@ -169,21 +178,44 @@ const Navbar = ({ onLogout, cartLength = 0, wishlistLength = 0 }: NavbarProps) =
                 {link.label}
               </Link>
             ))}
-            <Link
-              to="/account"
-              onClick={() => setMenuOpen(false)}
-              className={`${linkClass("/account")} py-1`}
-            >
-              My Account
-            </Link>
-            {onLogout && isAuthenticated && (
-              <button
-                type="button"
-                onClick={handleLogout}
-                className="text-left text-sm font-medium text-white/80 hover:text-[#C9974A] py-1 transition sm:hidden"
-              >
-                Logout
-              </button>
+            {isAuthenticated ? (
+              <>
+                <Link
+                  to="/account"
+                  onClick={() => setMenuOpen(false)}
+                  className={`${linkClass("/account")} py-1`}
+                >
+                  My Account
+                </Link>
+                {onLogout && (
+                  <button
+                    type="button"
+                    onClick={handleLogout}
+                    className="text-left text-sm font-medium text-white/80 hover:text-[#C9974A] py-1 transition sm:hidden"
+                  >
+                    Logout
+                  </button>
+                )}
+              </>
+            ) : (
+              <>
+                <Link
+                  to="/login"
+                  state={{ from: location }}
+                  onClick={() => setMenuOpen(false)}
+                  className="text-sm font-medium text-white/80 hover:text-[#C9974A] py-1 transition"
+                >
+                  Login
+                </Link>
+                <Link
+                  to="/signup"
+                  state={{ from: location }}
+                  onClick={() => setMenuOpen(false)}
+                  className="text-sm font-medium text-white/80 hover:text-[#C9974A] py-1 transition"
+                >
+                  Sign Up
+                </Link>
+              </>
             )}
           </div>
         )}
@@ -192,11 +224,6 @@ const Navbar = ({ onLogout, cartLength = 0, wishlistLength = 0 }: NavbarProps) =
       <p className="text-[#C9974A] text-sm font-semibold italic text-center py-1.5 border-t border-white/10">
         Where Elegance Meets Every Thread
       </p>
-
-      <AuthModal
-        isOpen={showAuthModal}
-        onClose={() => setShowAuthModal(false)}
-      />
     </nav>
   );
 };

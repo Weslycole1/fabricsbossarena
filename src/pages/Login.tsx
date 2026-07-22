@@ -20,6 +20,9 @@ const Login = () => {
   const location = useLocation();
   const { isDark, toggleTheme, t } = useTheme();
   const { showToast } = useToast();
+  const redirectTo =
+    (location.state as { from?: { pathname?: string } } | null)?.from?.pathname ||
+    "/products";
 
   useEffect(() => {
     if (location.pathname === "/signup") {
@@ -46,7 +49,7 @@ const Login = () => {
     }
 
     showToast("Welcome back! 🎉", "success");
-    navigate("/products");
+    navigate(redirectTo, { replace: true });
   };
 
   const handleSignup = async (e: React.FormEvent) => {
@@ -79,7 +82,7 @@ const Login = () => {
     }
 
     showToast("Account created successfully! 🎉", "success");
-    navigate("/products");
+    navigate(redirectTo, { replace: true });
   };
 
   return (

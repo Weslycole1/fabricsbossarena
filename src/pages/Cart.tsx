@@ -1,4 +1,4 @@
-import { Link } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useMemo, useState } from "react";
 import Navbar from "../components/Navbar";
 import { useTheme } from "../context/ThemeContext";
@@ -25,6 +25,8 @@ const Cart = ({ cart, setCart, wishlistLength = 0 }: CartProps) => {
   const { t } = useTheme();
   const { showToast } = useToast();
   const [showOrderModal, setShowOrderModal] = useState(false);
+  const navigate = useNavigate();
+  const location = useLocation();
 
   const increaseQty = (id: number) => {
     setCart((prev) =>
@@ -83,8 +85,14 @@ Please confirm availability and delivery details. Thank you!`;
     const whatsappUrl = `https://wa.me/2348034401331?text=${encodeURIComponent(cleanMessage)}`;
 
     const { data } = await supabase.auth.getSession();
+    if (!data.session?.user) {
+      showToast("Please log in to complete checkout.", "info");
+      setShowOrderModal(false);
+      navigate("/login", { state: { from: location } });
+      return;
+    }
     const orderPayload = {
-      user_id: data.session?.user?.id ?? null,
+      user_id: data.session.user.id,
       reference: orderRef,
       total: totalAmount,
       items: cart,

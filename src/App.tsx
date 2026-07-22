@@ -1,4 +1,4 @@
-import { Routes, Route, useLocation } from "react-router-dom";
+import { Routes, Route, useLocation, Navigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import type { Product } from "./types/product";
 
@@ -12,7 +12,6 @@ import Wishlist from "./pages/Wishlist";
 import Account from "./pages/Account";
 import ProductDetails from "./pages/ProductDetails";
 import { supabase } from "./lib/supabase";
-import AuthModal from "./components/AuthModal";
 
 const WISHLIST_KEY = "fabricsbossarena-wishlist";
 
@@ -20,7 +19,6 @@ function App() {
   const location = useLocation();
   const [cart, setCart] = useState<any[]>([]);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [showAuthModal, setShowAuthModal] = useState(false);
   const [wishlist, setWishlist] = useState<number[]>(() => {
     try {
       const saved = localStorage.getItem(WISHLIST_KEY);
@@ -39,17 +37,9 @@ function App() {
   }, [wishlist]);
 
   useEffect(() => {
-    const protectedPaths = ["/wishlist", "/account"];
-
     const checkSession = async () => {
       const { data } = await supabase.auth.getSession();
-      const hasSession = Boolean(data.session);
-      setIsAuthenticated(hasSession);
-      if (!hasSession && protectedPaths.some((path) => location.pathname.startsWith(path))) {
-        setShowAuthModal(true);
-      } else {
-        setShowAuthModal(false);
-      }
+      setIsAuthenticated(Boolean(data.session));
     };
 
     void checkSession();
@@ -57,17 +47,11 @@ function App() {
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((_event, session) => {
-      const hasSession = Boolean(session);
-      setIsAuthenticated(hasSession);
-      if (!hasSession && protectedPaths.some((path) => location.pathname.startsWith(path))) {
-        setShowAuthModal(true);
-      } else {
-        setShowAuthModal(false);
-      }
+      setIsAuthenticated(Boolean(session));
     });
 
     return () => subscription.unsubscribe();
-  }, [location.pathname]);
+  }, []);
 
   const addToCart = (product: Product, quantity = 1) => {
     setCart((prevCart) => {
@@ -98,72 +82,82 @@ function App() {
     cartLength: cart.length,
   };
 
-  return (
-    <>
-      <Routes>
-        <Route path="/" element={<Login />} />
-        <Route path="/login" element={<Login />} />
-        <Route path="/signup" element={<Login />} />
-        <Route
-          path="/home"
-          element={
-            <Home
-              cart={cart}
-              setCart={setCart}
-              addToCart={addToCart}
-              wishlist={wishlist}
-              toggleWishlist={toggleWishlist}
-            />
-          }
-        />
-        <Route
-          path="/cart"
-          element={<Cart cart={cart} setCart={setCart} {...sharedNav} />}
-        />
-        <Route
-          path="/wishlist"
-          element={
-            <Wishlist
-              wishlist={wishlist}
-              toggleWishlist={toggleWishlist}
-              addToCart={addToCart}
-              cartLength={cart.length}
-            />
-          }
-        />
-        <Route
-          path="/account"
-          element={
-            <Account clearWishlist={clearWishlist} {...sharedNav} />
-          }
-        />
-        <Route
-          path="/products"
-          element={
-            <Products
-              wishlist={wishlist}
-              toggleWishlist={toggleWishlist}
-              addToCart={addToCart}
-              cartLength={cart.length}
-            />
-          }
-        />
-        <Route
-          path="/products/:id"
-          element={
-            <ProductDetails addToCart={addToCart} {...sharedNav} />
-          }
-        />
-        <Route path="/about" element={<About {...sharedNav} />} />
-        <Route path="/contact" element={<Contact {...sharedNav} />} />
-      </Routes>
+  const requireAuth = (element: React.ReactNode) => {
+    if (!isAuthenticated) {
+      return <Navigate to="/login" replace state={{ from: location }} />;
+    }
+    return element;
+  };
 
-      <AuthModal
-        isOpen={!isAuthenticated && showAuthModal}
-        onClose={() => setShowAuthModal(false)}
-        onSuccess={() => setShowAuthModal(false)}
+  return (
+    <Routes>
+      <Route
+        path="/"
+        element={
+          <Home
+            cart={cart}
+            setCart={setCart}
+            addToCart={addToCart}
+            wishlist={wishlist}
+            toggleWishlist={toggleWishlist}
+          />
+        }
       />
-    </>
+      <Route path="/login" element={<Login />} />
+      <Route path="/signup" element={<Login />} />
+      <Route
+        path="/home"
+        element={
+          <Home
+            cart={cart}
+            setCart={setCart}
+            addToCart={addToCart}
+            wishlist={wishlist}
+            toggleWishlist={toggleWishlist}
+          />
+        }
+      />
+      <Route
+        path="/cart"
+        element={<Cart cart={cart} setCart={setCart} {...sharedNav} />}
+      />
+      <Route
+        path="/wishlist"
+        element={requireAuth(
+          <Wishlist
+            wishlist={wishlist}
+            toggleWishlist={toggleWishlist}
+            addToCart={addToCart}
+            cartLength={cart.length}
+          />
+        )}
+      />
+      <Route
+        path="/account"
+        element={requireAuth(
+          <Account clearWishlist={clearWishlist} {...sharedNav} />
+        )}
+      />
+      <Route
+        path="/products"
+        element={
+          <Products
+            wishlist={wishlist}
+            toggleWishlist={toggleWishlist}
+            addToCart={addToCart}
+            cartLength={cart.length}
+          />
+        }
+      />
+      <Route
+        path="/products/:id"
+        element={
+          <ProductDetails addToCart={addToCart} {...sharedNav} />
+        }
+      />
+      <Route path="/about" element={<About {...sharedNav} />} />
+      <Route path="/contact" element={<Contact {...sharedNav} />} />
+    </Routes>
   );
 }
 
