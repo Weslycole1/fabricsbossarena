@@ -1,4 +1,4 @@
-import { Routes, Route, useLocation, Navigate } from "react-router-dom";
+import { Routes, Route, useLocation, Navigate, Outlet } from "react-router-dom";
 import { useEffect, useState } from "react";
 import type { Product } from "./types/product";
 
@@ -12,6 +12,14 @@ import Wishlist from "./pages/Wishlist";
 import Account from "./pages/Account";
 import ProductDetails from "./pages/ProductDetails";
 import { supabase } from "./lib/supabase";
+
+import { AdminAuthProvider } from "./admin/context/AdminAuthContext";
+import AdminRoute from "./admin/components/AdminRoute";
+import AdminLayout from "./admin/components/AdminLayout";
+import AdminLogin from "./admin/pages/AdminLogin";
+import AdminDashboard from "./admin/pages/AdminDashboard";
+import AdminProductsList from "./admin/pages/AdminProductsList";
+import AdminProductForm from "./admin/pages/AdminProductForm";
 
 const WISHLIST_KEY = "fabricsbossarena-wishlist";
 
@@ -157,6 +165,30 @@ function App() {
       />
       <Route path="/about" element={<About {...sharedNav} />} />
       <Route path="/contact" element={<Contact {...sharedNav} />} />
+
+      {/* Admin dashboard — single AdminAuthProvider shared by login + guarded routes */}
+      <Route
+        element={
+          <AdminAuthProvider>
+            <Outlet />
+          </AdminAuthProvider>
+        }
+      >
+        <Route path="/admin/login" element={<AdminLogin />} />
+        <Route
+          path="/admin"
+          element={
+            <AdminRoute>
+              <AdminLayout />
+            </AdminRoute>
+          }
+        >
+          <Route index element={<AdminDashboard />} />
+          <Route path="products" element={<AdminProductsList />} />
+          <Route path="products/new" element={<AdminProductForm />} />
+          <Route path="products/edit/:id" element={<AdminProductForm />} />
+        </Route>
+      </Route>
     </Routes>
   );
 }
