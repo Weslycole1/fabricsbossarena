@@ -1,5 +1,5 @@
 import { Routes, Route, useLocation, Navigate, Outlet } from "react-router-dom";
-import { useEffect, useState } from "react";
+import { useEffect, useState, Suspense, lazy } from "react";
 import type { Product } from "./types/product";
 
 import Home from "./pages/Home";
@@ -13,13 +13,22 @@ import Account from "./pages/Account";
 import ProductDetails from "./pages/ProductDetails";
 import { supabase } from "./lib/supabase";
 
-import { AdminAuthProvider } from "./admin/context/AdminAuthContext";
-import AdminRoute from "./admin/components/AdminRoute";
-import AdminLayout from "./admin/components/AdminLayout";
-import AdminLogin from "./admin/pages/AdminLogin";
-import AdminDashboard from "./admin/pages/AdminDashboard";
-import AdminProductsList from "./admin/pages/AdminProductsList";
-import AdminProductForm from "./admin/pages/AdminProductForm";
+// Admin dashboard is code-split: storefront visitors never download it.
+const AdminAuthProvider = lazy(() =>
+  import("./admin/context/AdminAuthContext").then((m) => ({ default: m.AdminAuthProvider }))
+);
+const AdminRoute = lazy(() => import("./admin/components/AdminRoute"));
+const AdminLayout = lazy(() => import("./admin/components/AdminLayout"));
+const AdminLogin = lazy(() => import("./admin/pages/AdminLogin"));
+const AdminDashboard = lazy(() => import("./admin/pages/AdminDashboard"));
+const AdminProductsList = lazy(() => import("./admin/pages/AdminProductsList"));
+const AdminProductForm = lazy(() => import("./admin/pages/AdminProductForm"));
+
+const AdminFallback = () => (
+  <div className="min-h-screen flex items-center justify-center bg-[#FAF7F2]">
+    <div className="h-10 w-10 rounded-full border-4 border-[#E8E0D5] border-t-[#C9974A] animate-spin" />
+  </div>
+);
 
 const WISHLIST_KEY = "fabricsbossarena-wishlist";
 
@@ -166,12 +175,14 @@ function App() {
       <Route path="/about" element={<About {...sharedNav} />} />
       <Route path="/contact" element={<Contact {...sharedNav} />} />
 
-      {/* Admin dashboard — single AdminAuthProvider shared by login + guarded routes */}
+      {/* Admin dashboard — code-split, single AdminAuthProvider shared by login + guarded routes */}
       <Route
         element={
-          <AdminAuthProvider>
-            <Outlet />
-          </AdminAuthProvider>
+          <Suspense fallback={<AdminFallback />}>
+            <AdminAuthProvider>
+              <Outlet />
+            </AdminAuthProvider>
+          </Suspense>
         }
       >
         <Route path="/admin/login" element={<AdminLogin />} />

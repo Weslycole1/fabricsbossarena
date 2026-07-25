@@ -1,3 +1,7 @@
+import { useEffect, useRef } from "react";
+import { AlertTriangle } from "lucide-react";
+import Button from "./ui/Button";
+
 interface ConfirmDialogProps {
   open: boolean;
   title: string;
@@ -17,36 +21,62 @@ const ConfirmDialog = ({
   onConfirm,
   onCancel,
 }: ConfirmDialogProps) => {
+  const confirmRef = useRef<HTMLButtonElement>(null);
+
+  useEffect(() => {
+    if (!open) return;
+    confirmRef.current?.focus();
+
+    const handleKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape" && !busy) onCancel();
+    };
+    document.addEventListener("keydown", handleKey);
+    return () => document.removeEventListener("keydown", handleKey);
+  }, [open, busy, onCancel]);
+
   if (!open) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center px-4">
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center px-4"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="confirm-dialog-title"
+    >
       <button
         type="button"
         aria-label="Dismiss"
         onClick={onCancel}
-        className="absolute inset-0 bg-black/50"
+        disabled={busy}
+        className="absolute inset-0 bg-black/50 backdrop-blur-[2px] animate-fadeIn"
       />
-      <div className="relative bg-white rounded-2xl shadow-xl w-full max-w-sm p-6">
-        <h3 className="text-lg font-bold text-[#2C1810] mb-2">{title}</h3>
-        <p className="text-sm text-[#6B5B4E] mb-6">{description}</p>
+      <div className="relative bg-white rounded-xl2 shadow-premium-lg w-full max-w-sm p-6 animate-scaleIn">
+        <div className="h-11 w-11 rounded-xl bg-red-50 text-red-500 flex items-center justify-center mb-4">
+          <AlertTriangle size={22} strokeWidth={2} />
+        </div>
+        <h3
+          id="confirm-dialog-title"
+          className="font-display text-lg font-semibold text-brand-ink mb-1.5"
+        >
+          {title}
+        </h3>
+        <p className="text-sm text-brand-muted mb-6 leading-relaxed">
+          {description}
+        </p>
         <div className="flex justify-end gap-3">
-          <button
-            type="button"
-            onClick={onCancel}
-            disabled={busy}
-            className="px-4 py-2 rounded-xl text-sm font-medium border border-[#E8E0D5] text-[#2C1810] hover:bg-[#FAF7F2] transition disabled:opacity-60"
-          >
+          <Button variant="secondary" size="md" onClick={onCancel} disabled={busy}>
             Cancel
-          </button>
-          <button
-            type="button"
+          </Button>
+          <Button
+            ref={confirmRef}
+            variant="danger"
+            size="md"
             onClick={onConfirm}
-            disabled={busy}
-            className="px-4 py-2 rounded-xl text-sm font-medium bg-red-600 text-white hover:bg-red-700 transition disabled:opacity-60"
+            loading={busy}
+            className="!bg-red-600 !text-white !border-red-600 hover:!bg-red-700"
           >
             {busy ? "Deleting…" : confirmLabel}
-          </button>
+          </Button>
         </div>
       </div>
     </div>

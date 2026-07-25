@@ -12,3 +12,13 @@
     transform: translateX(0);
   }
 }
+
+.admin-skeleton {
+  background: linear-gradient(
+    90deg,
+    #eee5d8 25%,
+    #f5efe4 37%,
+    #eee5d8 63%
+  );
+  background-size: 800px 100%;
+}

@@ -17,17 +17,19 @@ export interface ProductInput {
 }
 
 export async function fetchDashboardStats() {
-  const [{ count: productCount }, { count: categoryCount }, recent] =
+  const [{ count: productCount }, { count: categoryCount }, recent, allProducts] =
     await Promise.all([
       supabase.from("products").select("*", { count: "exact", head: true }),
       supabase.from("categories").select("*", { count: "exact", head: true }),
       fetchRecentProducts(5),
+      fetchAllProducts(),
     ]);
 
   return {
     totalProducts: productCount ?? 0,
     totalCategories: categoryCount ?? 0,
     recentProducts: recent,
+    allProducts,
   };
 }
 

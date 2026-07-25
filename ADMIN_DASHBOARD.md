@@ -46,6 +46,24 @@ exposed to the client.
   and the `product-images` storage bucket. Even if someone bypassed the React
   app entirely, non-admin writes are rejected by the database.
 
+## Design system
+
+The dashboard uses a small, additive design-token layer in `tailwind.config.js`
+(`brand.*` colors, `xl2` radius, `premium` shadows, `fadeIn`/`scaleIn`/`shimmer`
+animations) plus `Playfair Display` + `Inter` webfonts loaded in `index.html`.
+None of this touches existing storefront classes — it only adds new token
+names that the storefront never references, so `/`, `/products`, etc. render
+exactly as before.
+
+Shared primitives live in `src/admin/components/ui/`: `Card`, `Button`,
+`Badge`, `Skeleton`, `EmptyState`. Every admin page is built from these, so
+spacing, radii, shadows, and hover/focus states stay consistent.
+
+**Performance:** the entire `src/admin/*` tree (including `recharts` and
+`lucide-react`) is code-split via `React.lazy` in `App.tsx`. Storefront
+visitors never download it — it only loads when someone actually navigates to
+`/admin/*`.
+
 ## Where things live
 
 ```

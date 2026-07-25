@@ -1,19 +1,36 @@
 import { useState } from "react";
-import { Link, NavLink, Outlet, useNavigate } from "react-router-dom";
+import { Link, NavLink, Outlet, useLocation, useNavigate } from "react-router-dom";
+import {
+  LayoutDashboard,
+  Shirt,
+  PlusCircle,
+  Store,
+  LogOut,
+  Menu,
+  X,
+} from "lucide-react";
 import { useAdminAuth } from "../context/AdminAuthContext";
 import { useToast } from "../../hooks/useToast";
 
 const NAV_ITEMS = [
-  { label: "Dashboard", to: "/admin", end: true, icon: "📊" },
-  { label: "Products", to: "/admin/products", end: false, icon: "🧵" },
-  { label: "Add Product", to: "/admin/products/new", end: true, icon: "➕" },
+  { label: "Dashboard", to: "/admin", end: true, icon: LayoutDashboard },
+  { label: "Products", to: "/admin/products", end: false, icon: Shirt },
+  { label: "Add Product", to: "/admin/products/new", end: true, icon: PlusCircle },
 ];
+
+const PAGE_TITLES: Record<string, string> = {
+  "/admin": "Dashboard",
+  "/admin/products": "Products",
+  "/admin/products/new": "Add Product",
+};
 
 const AdminLayout = () => {
   const { adminEmail, signOut } = useAdminAuth();
   const { showToast } = useToast();
   const navigate = useNavigate();
+  const location = useLocation();
   const [sidebarOpen, setSidebarOpen] = useState(false);
+
 
   const handleLogout = async () => {
     await signOut();
@@ -21,73 +38,88 @@ const AdminLayout = () => {
     navigate("/admin/login", { replace: true });
   };
 
+  const pageTitle =
+    PAGE_TITLES[location.pathname] ||
+    (location.pathname.startsWith("/admin/products/edit") ? "Edit Product" : "");
+
   return (
-    <div className="min-h-screen bg-[#FAF7F2] flex">
+    <div className="min-h-screen bg-brand-bg flex font-sans">
       {/* Mobile overlay */}
-      {sidebarOpen && (
-        <button
-          type="button"
-          aria-label="Close sidebar"
-          onClick={() => setSidebarOpen(false)}
-          className="fixed inset-0 bg-black/40 z-30 lg:hidden"
-        />
-      )}
+      <div
+        aria-hidden="true"
+        onClick={() => setSidebarOpen(false)}
+        className={`fixed inset-0 bg-black/40 z-30 lg:hidden transition-opacity duration-200 ${
+          sidebarOpen ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"
+        }`}
+      />
 
       {/* Sidebar */}
       <aside
-        className={`fixed lg:static inset-y-0 left-0 z-40 w-64 bg-[#2C1810] text-[#F5F0E8] flex flex-col transition-transform duration-200 ${
+        className={`fixed lg:static inset-y-0 left-0 z-40 w-72 bg-brand-ink text-brand-bg flex flex-col transition-transform duration-300 ease-out ${
           sidebarOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"
         }`}
       >
-        <div className="px-6 py-6 border-b border-white/10">
-          <Link to="/admin" className="flex items-center gap-2">
-            <span className="text-xl">🧵</span>
+        <div className="px-6 py-7 border-b border-white/10 flex items-center justify-between">
+          <Link to="/admin" className="flex items-center gap-3 group">
+            <span className="h-10 w-10 rounded-xl bg-brand-gold/15 flex items-center justify-center text-lg text-brand-gold group-hover:bg-brand-gold/25 transition-colors">
+              🧵
+            </span>
             <div>
-              <p className="font-bold text-[#C9974A] leading-tight">
+              <p className="font-display font-semibold text-brand-goldSoft leading-tight tracking-wide">
                 FabricsBossArena
               </p>
-              <p className="text-xs text-white/60 leading-tight">
+              <p className="text-[11px] uppercase tracking-[0.15em] text-white/45 leading-tight mt-0.5">
                 Admin Dashboard
               </p>
             </div>
           </Link>
+          <button
+            type="button"
+            onClick={() => setSidebarOpen(false)}
+            className="lg:hidden text-white/70 hover:text-white p-1 rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-gold"
+            aria-label="Close sidebar"
+          >
+            <X size={20} />
+          </button>
         </div>
 
-        <nav className="flex-1 px-3 py-6 space-y-1">
-          {NAV_ITEMS.map((item) => (
-            <NavLink
-              key={item.to}
-              to={item.to}
-              end={item.end}
-              onClick={() => setSidebarOpen(false)}
-              className={({ isActive }) =>
-                `flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-medium transition ${
-                  isActive
-                    ? "bg-[#C9974A] text-white"
-                    : "text-white/80 hover:bg-white/10"
-                }`
-              }
-            >
-              <span aria-hidden="true">{item.icon}</span>
-              {item.label}
-            </NavLink>
-          ))}
+        <nav className="flex-1 px-3 py-6 space-y-1" aria-label="Admin navigation">
+          {NAV_ITEMS.map((item) => {
+            const Icon = item.icon;
+            return (
+              <NavLink
+                key={item.to}
+                to={item.to}
+                end={item.end}
+                className={({ isActive }) =>
+                  `group flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-medium transition-all duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-gold ${
+                    isActive
+                      ? "bg-brand-gold text-brand-ink shadow-premium"
+                      : "text-white/75 hover:bg-white/10 hover:text-white"
+                  }`
+                }
+              >
+                <Icon size={18} strokeWidth={2} />
+                {item.label}
+              </NavLink>
+            );
+          })}
         </nav>
 
         <div className="px-3 py-4 border-t border-white/10 space-y-1">
           <Link
             to="/"
-            className="flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-medium text-white/80 hover:bg-white/10 transition"
+            className="flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-medium text-white/75 hover:bg-white/10 hover:text-white transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-gold"
           >
-            <span aria-hidden="true">🏬</span>
+            <Store size={18} />
             View Store
           </Link>
           <button
             type="button"
             onClick={handleLogout}
-            className="w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-medium text-white/80 hover:bg-white/10 transition text-left"
+            className="w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-medium text-white/75 hover:bg-red-500/15 hover:text-red-200 transition-colors text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-gold"
           >
-            <span aria-hidden="true">🚪</span>
+            <LogOut size={18} />
             Sign Out
           </button>
         </div>
@@ -95,28 +127,36 @@ const AdminLayout = () => {
 
       {/* Main column */}
       <div className="flex-1 flex flex-col min-w-0">
-        <header className="sticky top-0 z-20 bg-white border-b border-[#E8E0D5] px-4 sm:px-6 py-3 flex items-center justify-between">
-          <button
-            type="button"
-            onClick={() => setSidebarOpen(true)}
-            className="lg:hidden text-[#2C1810] text-xl px-2"
-            aria-label="Open sidebar"
-          >
-            ☰
-          </button>
-          <div className="hidden lg:block" />
+        <header className="sticky top-0 z-20 bg-white/90 backdrop-blur border-b border-brand-border px-4 sm:px-6 py-3.5 flex items-center justify-between">
+          <div className="flex items-center gap-3 min-w-0">
+            <button
+              type="button"
+              onClick={() => setSidebarOpen(true)}
+              className="lg:hidden text-brand-ink p-1.5 rounded-lg hover:bg-brand-bg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-gold"
+              aria-label="Open sidebar"
+            >
+              <Menu size={22} />
+            </button>
+            {pageTitle && (
+              <h2 className="font-display font-semibold text-brand-ink text-lg truncate hidden sm:block">
+                {pageTitle}
+              </h2>
+            )}
+          </div>
           <div className="flex items-center gap-3">
-            <span className="text-sm text-[#6B5B4E] hidden sm:inline">
+            <span className="text-sm text-brand-muted hidden sm:inline truncate max-w-[180px]">
               {adminEmail}
             </span>
-            <span className="h-8 w-8 rounded-full bg-[#C9974A] text-white flex items-center justify-center text-sm font-bold">
+            <span className="h-9 w-9 rounded-full bg-brand-gold text-white flex items-center justify-center text-sm font-bold shadow-premium">
               {adminEmail?.[0]?.toUpperCase() ?? "A"}
             </span>
           </div>
         </header>
 
         <main className="flex-1 p-4 sm:p-6 lg:p-8">
-          <Outlet />
+          <div key={location.pathname} className="animate-fadeIn">
+            <Outlet />
+          </div>
         </main>
       </div>
     </div>
