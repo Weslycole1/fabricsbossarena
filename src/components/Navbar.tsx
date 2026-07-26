@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useTheme } from "../context/ThemeContext";
 import { supabase } from "../lib/supabase";
+import Logo from "./brand/Logo";
 
 interface NavbarProps {
   onLogout?: () => void;
@@ -66,10 +67,12 @@ const Navbar = ({ onLogout, cartLength = 0, wishlistLength = 0 }: NavbarProps) =
             className="flex items-center gap-2 shrink-0 min-w-0"
             onClick={() => setMenuOpen(false)}
           >
-            <span className="text-base sm:text-xl">🧵</span>
-            <span className="text-white font-bold text-base sm:text-xl truncate">
-              FabricsBossArena
-            </span>
+            <Logo
+              iconSize={30}
+              iconWrapperClassName="w-7 h-7 sm:w-9 sm:h-9"
+              wordmarkClassName="text-white text-base sm:text-xl"
+              wordmarkWrapperClassName="hidden sm:flex flex-col leading-tight min-w-0"
+            />
           </Link>
 
           <div className="hidden md:flex items-center gap-6">

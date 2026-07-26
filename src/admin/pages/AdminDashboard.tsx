@@ -301,7 +301,7 @@ const AdminDashboard = () => {
                   className="flex items-center gap-4 py-3.5 group"
                 >
                   <img
-                    src={product.img_url || "/vite.svg"}
+                    src={product.img_url || "/favicon.svg"}
                     alt={product.name}
                     className="h-12 w-12 rounded-lg object-cover bg-brand-bg border border-brand-border flex-shrink-0"
                   />

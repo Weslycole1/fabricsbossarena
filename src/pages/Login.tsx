@@ -4,6 +4,7 @@ import fabricImage from "../assets/Untitled-design-42-2.png";
 import { useTheme } from "../context/ThemeContext";
 import { useToast } from "../hooks/useToast";
 import { supabase } from "../lib/supabase";
+import Logo from "../components/brand/Logo";
 
 const Login = () => {
   const [activeForm, setActiveForm] = useState<"signup" | "login">("signup");
@@ -132,11 +133,13 @@ const Login = () => {
         </button>
 
         <div className="w-full max-w-md">
-          <h1
-            className={`font-bold text-xl sm:text-2xl text-center mb-8 ${t.headingDark}`}
-          >
-            🧵 FabricsBossArena
-          </h1>
+          <div className="flex justify-center mb-8">
+            <Logo
+              iconSize={34}
+              iconWrapperClassName="w-9 h-9"
+              wordmarkClassName={`${t.headingDark} text-xl sm:text-2xl`}
+            />
+          </div>
 
           <div className="flex gap-2 mb-6">
             <button

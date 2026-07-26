@@ -8,6 +8,7 @@ import SkeletonCard from "../components/SkeletonCard";
 import LoadingSpinner from "../components/LoadingSpinner";
 import Footer from "../components/Footer";
 import { useTheme } from "../context/ThemeContext";
+import { useInView } from "../hooks/useInView";
 import type { Product, DbProduct } from "../types/product";
 import { supabase } from "../lib/supabase";
 import { mapDbProduct } from "../utils/mapProduct";
@@ -84,6 +85,9 @@ const Home = ({ cart, addToCart, wishlist, toggleWishlist }: HomeProps) => {
     });
 
   const newArrivals = products.slice(0, 3);
+  const { ref: bannerRef, isInView: bannerInView } = useInView<HTMLDivElement>();
+  const { ref: gridRef, isInView: gridInView } = useInView<HTMLDivElement>(0.05);
+
   return (
     <div className={`min-h-screen overflow-x-hidden ${t.pageBg}`}>
       <Navbar
@@ -93,33 +97,33 @@ const Home = ({ cart, addToCart, wishlist, toggleWishlist }: HomeProps) => {
       />
 
       <section
-        className="relative h-[50vh] md:h-[70vh] bg-cover bg-center md:bg-fixed"
+        className="relative h-[55vh] md:h-[75vh] bg-cover bg-center md:bg-fixed"
         style={{ backgroundImage: `url(${fabricImage})` }}
       >
-        <div className="absolute inset-0 bg-gradient-to-b from-[#2C1810]/80 via-[#2C1810]/65 to-[#2C1810]/85" />
-        <div className="relative h-full max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col items-center justify-center text-center">
-          <p className="text-[#C9974A] tracking-[0.2em] uppercase text-sm font-semibold">
-            PREMIUM FABRICS
+        <div className="absolute inset-0 bg-gradient-to-b from-[#2C1810]/85 via-[#2C1810]/65 to-[#2C1810]/90" />
+        <div className="relative h-full max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col items-center justify-center text-center animate-fadeIn">
+          <p className="text-[#C9974A] tracking-[0.25em] uppercase text-xs sm:text-sm font-semibold">
+            Premium Fabrics &amp; Fashion Supplies
           </p>
-          <h1 className="text-white text-4xl md:text-6xl font-bold mt-4">
+          <h1 className="text-white font-display text-4xl sm:text-5xl md:text-6xl font-semibold mt-5 leading-[1.1] max-w-3xl">
             Discover Fabrics That Tell Your Story
           </h1>
-          <p className="text-white/70 mt-4 text-sm sm:text-base max-w-2xl">
-            Premium African and luxury fabrics delivered to your door
+          <p className="text-white/75 mt-5 text-sm sm:text-base max-w-2xl leading-relaxed">
+            Premium fabrics, wool, and tailoring supplies delivered to your door.
           </p>
-          <div className="mt-7 flex flex-col sm:flex-row gap-3">
+          <div className="mt-8 flex flex-col sm:flex-row gap-3.5">
             <button
               type="button"
               onClick={() =>
                 document.getElementById("products-grid")?.scrollIntoView({ behavior: "smooth" })
               }
-              className="bg-[#C9974A] text-white rounded-full px-8 py-3 font-bold hover:bg-[#b8863a] transition"
+              className="bg-[#C9974A] text-white rounded-full px-8 py-3 font-bold shadow-[0_8px_24px_-8px_rgba(201,151,74,0.6)] hover:bg-[#b8863a] hover:shadow-[0_12px_32px_-8px_rgba(201,151,74,0.7)] hover:-translate-y-0.5 active:translate-y-0 transition-all duration-200"
             >
               Shop Now
             </button>
             <Link
               to="/about"
-              className="border border-white text-white rounded-full px-8 py-3 font-bold hover:bg-white/10 transition"
+              className="border border-white/70 text-white rounded-full px-8 py-3 font-bold hover:bg-white hover:text-[#2C1810] hover:-translate-y-0.5 active:translate-y-0 transition-all duration-200"
             >
               Our Story
             </Link>
@@ -127,22 +131,27 @@ const Home = ({ cart, addToCart, wishlist, toggleWishlist }: HomeProps) => {
         </div>
       </section>
 
-      {/* New Arrivals Banner */}
-      <section className="px-4 sm:px-6 lg:px-8 py-6 max-w-7xl mx-auto">
-        <div className="rounded-2xl bg-gradient-to-r from-[#2C1810] to-[#C9974A] px-6 sm:px-8 py-8 flex flex-col md:flex-row items-center justify-between gap-6 overflow-hidden">
+      {/* Featured Collection Banner */}
+      <section className="px-4 sm:px-6 lg:px-8 py-8 sm:py-10 max-w-7xl mx-auto">
+        <div
+          ref={bannerRef}
+          className={`rounded-2xl bg-gradient-to-r from-[#2C1810] to-[#C9974A] px-6 sm:px-8 py-8 sm:py-10 flex flex-col md:flex-row items-center justify-between gap-6 overflow-hidden shadow-[0_20px_45px_-15px_rgba(44,24,16,0.35)] transition-all duration-700 ${
+            bannerInView ? "opacity-100 translate-y-0" : "opacity-0 translate-y-6"
+          }`}
+        >
           <div className="text-center md:text-left">
-            <p className="text-[#C9974A] text-xs font-bold tracking-widest mb-2">
-              NEW ARRIVALS
+            <p className="text-white/80 text-xs font-bold tracking-[0.2em] mb-2">
+              FEATURED COLLECTION
             </p>
-            <h2 className="text-white text-xl sm:text-2xl font-bold mb-2">
+            <h2 className="text-white font-display text-2xl sm:text-3xl font-semibold mb-2.5 leading-snug">
               Discover Our Latest Fabrics
             </h2>
-            <p className="text-white/70 text-sm mb-4 max-w-md">
+            <p className="text-white/70 text-sm mb-5 max-w-md leading-relaxed">
               Fresh drops every week — from Ankara to premium Silk
             </p>
             <Link
               to="/home"
-              className="inline-block bg-white text-[#2C1810] font-bold rounded-full px-6 py-2.5 hover:bg-[#FAF7F2] transition text-sm"
+              className="inline-block bg-white text-[#2C1810] font-bold rounded-full px-6 py-2.5 hover:bg-[#FAF7F2] hover:-translate-y-0.5 hover:shadow-lg active:translate-y-0 transition-all duration-200 text-sm"
             >
               Shop Now
             </Link>
@@ -153,7 +162,7 @@ const Home = ({ cart, addToCart, wishlist, toggleWishlist }: HomeProps) => {
                 key={p.id}
                 src={resolveImageUrl(p.img_url)}
                 alt={p.name}
-                className={`w-12 h-12 rounded-full border-2 border-white object-cover ${i > 0 ? "-ml-3" : ""}`}
+                className={`w-12 h-12 sm:w-14 sm:h-14 rounded-full border-2 border-white object-cover shadow-md ${i > 0 ? "-ml-3" : ""}`}
               />
             ))}
           </div>
@@ -210,7 +219,10 @@ const Home = ({ cart, addToCart, wishlist, toggleWishlist }: HomeProps) => {
 
       <section
         id="products-grid"
-        className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 px-4 sm:px-6 lg:px-8 py-6 sm:py-8 max-w-7xl mx-auto"
+        ref={gridRef}
+        className={`grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 sm:gap-7 px-4 sm:px-6 lg:px-8 py-8 sm:py-10 max-w-7xl mx-auto transition-opacity duration-700 ${
+          gridInView ? "opacity-100" : "opacity-0"
+        }`}
       >
         {loading
           ? Array.from({ length: 6 }).map((_, i) => <SkeletonCard key={i} />)

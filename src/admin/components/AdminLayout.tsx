@@ -11,6 +11,7 @@ import {
 } from "lucide-react";
 import { useAdminAuth } from "../context/AdminAuthContext";
 import { useToast } from "../../hooks/useToast";
+import Logo from "../../components/brand/Logo";
 
 const NAV_ITEMS = [
   { label: "Dashboard", to: "/admin", end: true, icon: LayoutDashboard },
@@ -60,18 +61,14 @@ const AdminLayout = () => {
         }`}
       >
         <div className="px-6 py-7 border-b border-white/10 flex items-center justify-between">
-          <Link to="/admin" className="flex items-center gap-3 group">
-            <span className="h-10 w-10 rounded-xl bg-brand-gold/15 flex items-center justify-center text-lg text-brand-gold group-hover:bg-brand-gold/25 transition-colors">
-              🧵
-            </span>
-            <div>
-              <p className="font-display font-semibold text-brand-goldSoft leading-tight tracking-wide">
-                FabricsBossArena
-              </p>
-              <p className="text-[11px] uppercase tracking-[0.15em] text-white/45 leading-tight mt-0.5">
-                Admin Dashboard
-              </p>
-            </div>
+          <Link to="/admin" className="flex items-center gap-3 group min-w-0">
+            <Logo
+              iconSize={38}
+              iconWrapperClassName="w-9 h-9 flex-shrink-0 transition-transform duration-150 group-hover:scale-105"
+              wordmarkClassName="text-brand-goldSoft text-base"
+              subtitle="Admin Dashboard"
+              subtitleClassName="text-white/45"
+            />
           </Link>
           <button
             type="button"

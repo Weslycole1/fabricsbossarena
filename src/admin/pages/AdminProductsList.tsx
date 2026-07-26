@@ -315,7 +315,7 @@ const AdminProductsList = () => {
                     <td className="px-4 py-3">
                       <div className="flex items-center gap-3">
                         <img
-                          src={product.img_url || "/vite.svg"}
+                          src={product.img_url || "/favicon.svg"}
                           alt={product.name}
                           className="h-10 w-10 rounded-lg object-cover bg-brand-bg border border-brand-border flex-shrink-0"
                         />
