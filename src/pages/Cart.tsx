@@ -1,11 +1,12 @@
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import Navbar from "../components/Navbar";
 import { useTheme } from "../context/ThemeContext";
 import { useToast } from "../hooks/useToast";
 import OrderSummaryModal, { type CheckoutDetails } from "../components/OrderSummaryModal";
 import { resolveImageUrl } from "../data/imageMap";
 import { supabase } from "../lib/supabase";
+import { generateOrderReference } from "../types/order";
 
 interface CartItem {
   id: number;
@@ -25,6 +26,7 @@ const Cart = ({ cart, setCart, wishlistLength = 0 }: CartProps) => {
   const { t } = useTheme();
   const { showToast } = useToast();
   const [showOrderModal, setShowOrderModal] = useState(false);
+  const [orderRef, setOrderRef] = useState("");
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -56,10 +58,10 @@ const Cart = ({ cart, setCart, wishlistLength = 0 }: CartProps) => {
     0
   );
 
-  const orderRef = useMemo(
-    () => `FBA-${Math.floor(100000 + Math.random() * 900000)}`,
-    [showOrderModal]
-  );
+  const handleOpenCheckout = () => {
+    setOrderRef(generateOrderReference());
+    setShowOrderModal(true);
+  };
 
   const handleConfirmCheckout = async (details: CheckoutDetails) => {
     const itemsLine = cart
@@ -73,7 +75,7 @@ const Cart = ({ cart, setCart, wishlistLength = 0 }: CartProps) => {
 *Customer:*
 Name: ${details.name}
 Phone: ${details.phone}
-Address: ${details.address}
+Address: ${details.address}, ${details.city}, ${details.state}
 
 *Items:*
 ${itemsLine}
@@ -91,15 +93,23 @@ Please confirm availability and delivery details. Thank you!`;
       navigate("/login", { state: { from: location } });
       return;
     }
+
+    const nowIso = new Date().toISOString();
     const orderPayload = {
       user_id: data.session.user.id,
       reference: orderRef,
-      total: totalAmount,
       items: cart,
+      subtotal: totalAmount,
+      total: totalAmount,
       status: "pending",
+      payment_status: "pending",
       customer_name: details.name,
+      customer_email: details.email || null,
       customer_address: details.address,
+      customer_city: details.city,
+      customer_state: details.state,
       customer_phone: details.phone,
+      status_history: [{ status: "pending", changed_at: nowIso }],
     };
 
     const { error } = await supabase.from("orders").insert(orderPayload);
@@ -220,7 +230,7 @@ Please confirm availability and delivery details. Thank you!`;
 
             <button
               type="button"
-              onClick={() => setShowOrderModal(true)}
+              onClick={handleOpenCheckout}
               className="block bg-[#25D366] hover:bg-[#1ebe5c] text-white font-bold py-3 rounded-xl w-full text-center transition text-sm sm:text-base"
             >
               Checkout on WhatsApp

@@ -11,7 +11,10 @@ interface OrderItem {
 
 export interface CheckoutDetails {
   name: string;
+  email: string;
   address: string;
+  city: string;
+  state: string;
   phone: string;
 }
 
@@ -34,7 +37,10 @@ const OrderSummaryModal = ({
 }: OrderSummaryModalProps) => {
   const [animateIn, setAnimateIn] = useState(false);
   const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
   const [address, setAddress] = useState("");
+  const [city, setCity] = useState("");
+  const [state, setState] = useState("");
   const [phone, setPhone] = useState("");
   const [formError, setFormError] = useState("");
 
@@ -50,12 +56,19 @@ const OrderSummaryModal = ({
   if (!isOpen) return null;
 
   const handleConfirm = () => {
-    if (!name.trim() || !address.trim() || !phone.trim()) {
-      setFormError("Please fill in your name, address, and phone number.");
+    if (!name.trim() || !address.trim() || !phone.trim() || !city.trim() || !state.trim()) {
+      setFormError("Please fill in your name, address, city, state, and phone number.");
       return;
     }
     setFormError("");
-    onConfirm({ name: name.trim(), address: address.trim(), phone: phone.trim() });
+    onConfirm({
+      name: name.trim(),
+      email: email.trim(),
+      address: address.trim(),
+      city: city.trim(),
+      state: state.trim(),
+      phone: phone.trim(),
+    });
   };
 
   return (
@@ -125,12 +138,35 @@ const OrderSummaryModal = ({
             className="bg-[#FAF7F2] border border-[#E8E0D5] rounded-xl px-4 py-3 w-full focus:border-[#C9974A] focus:ring-1 focus:ring-[#C9974A] outline-none text-[#1A1A1A] text-sm"
           />
           <input
+            type="email"
+            placeholder="Email Address (optional)"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            className="bg-[#FAF7F2] border border-[#E8E0D5] rounded-xl px-4 py-3 w-full focus:border-[#C9974A] focus:ring-1 focus:ring-[#C9974A] outline-none text-[#1A1A1A] text-sm"
+          />
+          <input
             type="text"
             placeholder="Delivery Address"
             value={address}
             onChange={(e) => setAddress(e.target.value)}
             className="bg-[#FAF7F2] border border-[#E8E0D5] rounded-xl px-4 py-3 w-full focus:border-[#C9974A] focus:ring-1 focus:ring-[#C9974A] outline-none text-[#1A1A1A] text-sm"
           />
+          <div className="grid grid-cols-2 gap-3">
+            <input
+              type="text"
+              placeholder="City"
+              value={city}
+              onChange={(e) => setCity(e.target.value)}
+              className="bg-[#FAF7F2] border border-[#E8E0D5] rounded-xl px-4 py-3 w-full focus:border-[#C9974A] focus:ring-1 focus:ring-[#C9974A] outline-none text-[#1A1A1A] text-sm"
+            />
+            <input
+              type="text"
+              placeholder="State"
+              value={state}
+              onChange={(e) => setState(e.target.value)}
+              className="bg-[#FAF7F2] border border-[#E8E0D5] rounded-xl px-4 py-3 w-full focus:border-[#C9974A] focus:ring-1 focus:ring-[#C9974A] outline-none text-[#1A1A1A] text-sm"
+            />
+          </div>
           <input
             type="tel"
             placeholder="Phone Number"

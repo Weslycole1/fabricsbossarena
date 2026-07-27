@@ -23,6 +23,8 @@ const AdminLogin = lazy(() => import("./admin/pages/AdminLogin"));
 const AdminDashboard = lazy(() => import("./admin/pages/AdminDashboard"));
 const AdminProductsList = lazy(() => import("./admin/pages/AdminProductsList"));
 const AdminProductForm = lazy(() => import("./admin/pages/AdminProductForm"));
+const AdminOrdersList = lazy(() => import("./admin/pages/AdminOrdersList"));
+const AdminOrderDetails = lazy(() => import("./admin/pages/AdminOrderDetails"));
 
 const AdminFallback = () => (
   <div className="min-h-screen flex items-center justify-center bg-[#FAF7F2]">
@@ -198,6 +200,8 @@ function App() {
           <Route path="products" element={<AdminProductsList />} />
           <Route path="products/new" element={<AdminProductForm />} />
           <Route path="products/edit/:id" element={<AdminProductForm />} />
+          <Route path="orders" element={<AdminOrdersList />} />
+          <Route path="orders/:id" element={<AdminOrderDetails />} />
         </Route>
       </Route>
     </Routes>

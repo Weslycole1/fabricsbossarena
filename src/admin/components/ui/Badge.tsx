@@ -1,11 +1,13 @@
 import type { ReactNode } from "react";
 
-type BadgeVariant =
+export type BadgeVariant =
   | "gold"
   | "success"
   | "danger"
   | "neutral"
-  | "outline";
+  | "outline"
+  | "info"
+  | "warning";
 
 const VARIANT_CLASSES: Record<BadgeVariant, string> = {
   gold: "bg-brand-gold/12 text-brand-gold ring-1 ring-inset ring-brand-gold/25",
@@ -13,6 +15,8 @@ const VARIANT_CLASSES: Record<BadgeVariant, string> = {
   danger: "bg-red-50 text-red-600 ring-1 ring-inset ring-red-600/15",
   neutral: "bg-brand-bg text-brand-muted ring-1 ring-inset ring-brand-border",
   outline: "bg-transparent text-brand-ink ring-1 ring-inset ring-brand-border",
+  info: "bg-blue-50 text-blue-700 ring-1 ring-inset ring-blue-600/15",
+  warning: "bg-amber-50 text-amber-700 ring-1 ring-inset ring-amber-600/20",
 };
 
 interface BadgeProps {

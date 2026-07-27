@@ -4,6 +4,7 @@ import {
   LayoutDashboard,
   Shirt,
   PlusCircle,
+  ReceiptText,
   Store,
   LogOut,
   Menu,
@@ -17,12 +18,14 @@ const NAV_ITEMS = [
   { label: "Dashboard", to: "/admin", end: true, icon: LayoutDashboard },
   { label: "Products", to: "/admin/products", end: false, icon: Shirt },
   { label: "Add Product", to: "/admin/products/new", end: true, icon: PlusCircle },
+  { label: "Orders", to: "/admin/orders", end: false, icon: ReceiptText },
 ];
 
 const PAGE_TITLES: Record<string, string> = {
   "/admin": "Dashboard",
   "/admin/products": "Products",
   "/admin/products/new": "Add Product",
+  "/admin/orders": "Orders",
 };
 
 const AdminLayout = () => {
@@ -41,7 +44,11 @@ const AdminLayout = () => {
 
   const pageTitle =
     PAGE_TITLES[location.pathname] ||
-    (location.pathname.startsWith("/admin/products/edit") ? "Edit Product" : "");
+    (location.pathname.startsWith("/admin/products/edit")
+      ? "Edit Product"
+      : location.pathname.startsWith("/admin/orders/")
+      ? "Order Details"
+      : "");
 
   return (
     <div className="min-h-screen bg-brand-bg flex font-sans">
