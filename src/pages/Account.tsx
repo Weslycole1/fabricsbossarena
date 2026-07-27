@@ -1,9 +1,11 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
+import LoadingSpinner from "../components/LoadingSpinner";
 import { useTheme } from "../context/ThemeContext";
 import { useToast } from "../hooks/useToast";
+import { supabase } from "../lib/supabase";
 
 interface AccountProps {
   wishlistLength?: number;
@@ -11,13 +13,13 @@ interface AccountProps {
   clearWishlist: () => void;
 }
 
-const CARD_CLASS =
-  "bg-white rounded-2xl p-6 shadow-sm border border-[#E8E0D5]";
-const CARD_HEADING_CLASS =
-  "text-lg font-bold text-[#2C1810] mb-4 pb-2 border-b border-[#E8E0D5]";
-const LABEL_CLASS = "text-sm font-medium text-[#6B5B4E] mb-1 block";
-const INPUT_CLASS =
-  "bg-[#FAF7F2] border border-[#E8E0D5] rounded-xl px-4 py-3 w-full focus:border-[#C9974A] focus:ring-1 focus:ring-[#C9974A] outline-none text-[#1A1A1A]";
+interface ProfileRow {
+  id: string;
+  email: string | null;
+  first_name: string | null;
+  last_name: string | null;
+  phone: string | null;
+}
 
 const getPasswordStrength = (password: string): {
   label: string;
@@ -38,23 +40,26 @@ const ToggleSwitch = ({
 }: {
   checked: boolean;
   onChange: () => void;
-}) => (
-  <button
-    type="button"
-    role="switch"
-    aria-checked={checked}
-    onClick={onChange}
-    className={`relative w-12 h-6 rounded-full transition-colors ${
-      checked ? "bg-[#C9974A]" : "bg-gray-300"
-    }`}
-  >
-    <span
-      className={`absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform ${
-        checked ? "translate-x-6" : "translate-x-0"
+}) => {
+  const { isDark } = useTheme();
+  return (
+    <button
+      type="button"
+      role="switch"
+      aria-checked={checked}
+      onClick={onChange}
+      className={`relative w-12 h-6 rounded-full transition-colors ${
+        checked ? "bg-[#C9974A]" : isDark ? "bg-[#2C2018]" : "bg-gray-300"
       }`}
-    />
-  </button>
-);
+    >
+      <span
+        className={`absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform ${
+          checked ? "translate-x-6" : "translate-x-0"
+        }`}
+      />
+    </button>
+  );
+};
 
 const PasswordInput = ({
   label,
@@ -67,23 +72,26 @@ const PasswordInput = ({
   onChange: (v: string) => void;
   showStrength?: boolean;
 }) => {
+  const { t } = useTheme();
   const [visible, setVisible] = useState(false);
   const strength = getPasswordStrength(value);
+  const labelClass = `text-sm font-medium ${t.textSecondary} mb-1 block`;
+  const inputClass = `${t.inputBg} border ${t.border} rounded-xl px-4 py-3 w-full focus:border-[#C9974A] focus:ring-1 focus:ring-[#C9974A] outline-none ${t.textPrimary}`;
 
   return (
     <div>
-      <label className={LABEL_CLASS}>{label}</label>
+      <label className={labelClass}>{label}</label>
       <div className="relative">
         <input
           type={visible ? "text" : "password"}
           value={value}
           onChange={(e) => onChange(e.target.value)}
-          className={`${INPUT_CLASS} pr-12`}
+          className={`${inputClass} pr-12`}
         />
         <button
           type="button"
           onClick={() => setVisible((v) => !v)}
-          className="absolute right-3 top-1/2 -translate-y-1/2 text-[#6B5B4E] hover:text-[#C9974A] text-sm"
+          className={`absolute right-3 top-1/2 -translate-y-1/2 ${t.textSecondary} hover:text-[#C9974A] text-sm`}
         >
           {visible ? "Hide" : "Show"}
         </button>
@@ -95,7 +103,7 @@ const PasswordInput = ({
               className={`h-full rounded-full transition-all ${strength.color} ${strength.width}`}
             />
           </div>
-          <p className="text-xs text-[#6B5B4E] mt-1">{strength.label}</p>
+          <p className={`text-xs ${t.textSecondary} mt-1`}>{strength.label}</p>
         </div>
       )}
     </div>
@@ -114,20 +122,100 @@ const Account = ({
   clearWishlist,
 }: AccountProps) => {
   const navigate = useNavigate();
-  const { isDark, toggleTheme } = useTheme();
+  const { t, isDark, toggleTheme } = useTheme();
   const { showToast } = useToast();
 
-  const [firstName, setFirstName] = useState("Wesley");
-  const [lastName, setLastName] = useState("Cole-Showers");
-  const [email, setEmail] = useState("wesley@fabricsbossarena.com");
-  const [phone, setPhone] = useState("+234 803 440 1331");
+  const [userId, setUserId] = useState<string | null>(null);
+  const [loadingProfile, setLoadingProfile] = useState(true);
+  const [savingProfile, setSavingProfile] = useState(false);
+  const [memberSinceYear, setMemberSinceYear] = useState<number | null>(null);
+
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
+  const [email, setEmail] = useState("");
+  const [phone, setPhone] = useState("");
+
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [notifications, setNotifications] = useState(true);
 
-  const fullName = `${firstName} ${lastName}`.trim();
-  const avatarLetter = (firstName[0] || "U").toUpperCase();
+  // Always load the CURRENTLY authenticated user's profile — never hardcoded,
+  // never another user's data. If no profile row exists yet (e.g. a signup
+  // flow that didn't create one), create it automatically for this user id.
+  useEffect(() => {
+    let mounted = true;
+
+    const loadProfile = async () => {
+      setLoadingProfile(true);
+
+      const { data: userData, error: userError } = await supabase.auth.getUser();
+      const user = userData?.user;
+
+      if (userError || !user) {
+        if (!mounted) return;
+        navigate("/login");
+        return;
+      }
+
+      if (!mounted) return;
+      setUserId(user.id);
+      if (user.created_at) {
+        setMemberSinceYear(new Date(user.created_at).getFullYear());
+      }
+
+      const { data: profile, error: profileError } = await supabase
+        .from("profiles")
+        .select("id, email, first_name, last_name, phone")
+        .eq("id", user.id)
+        .maybeSingle<ProfileRow>();
+
+      if (!mounted) return;
+
+      if (profileError) {
+        showToast(`Failed to load profile: ${profileError.message}`, "error");
+        setEmail(user.email ?? "");
+        setLoadingProfile(false);
+        return;
+      }
+
+      if (profile) {
+        setFirstName(profile.first_name ?? "");
+        setLastName(profile.last_name ?? "");
+        setEmail(profile.email ?? user.email ?? "");
+        setPhone(profile.phone ?? "");
+        setLoadingProfile(false);
+        return;
+      }
+
+      // No profile row for this user yet — create one automatically.
+      const { data: created, error: createError } = await supabase
+        .from("profiles")
+        .insert({ id: user.id, email: user.email ?? "" })
+        .select("id, email, first_name, last_name, phone")
+        .single<ProfileRow>();
+
+      if (!mounted) return;
+
+      if (createError || !created) {
+        setEmail(user.email ?? "");
+      } else {
+        setFirstName(created.first_name ?? "");
+        setLastName(created.last_name ?? "");
+        setEmail(created.email ?? user.email ?? "");
+        setPhone(created.phone ?? "");
+      }
+      setLoadingProfile(false);
+    };
+
+    void loadProfile();
+    return () => {
+      mounted = false;
+    };
+  }, [navigate, showToast]);
+
+  const fullName = `${firstName} ${lastName}`.trim() || "Your Account";
+  const avatarLetter = (firstName[0] || email[0] || "U").toUpperCase();
 
   const statValues = {
     orders: 0,
@@ -135,12 +223,41 @@ const Account = ({
     saved: 0,
   };
 
-  const handleLogout = () => {
+  const handleSaveProfile = async () => {
+    if (!userId) return;
+    setSavingProfile(true);
+
+    const { error } = await supabase
+      .from("profiles")
+      .update({
+        first_name: firstName.trim(),
+        last_name: lastName.trim(),
+        email: email.trim(),
+        phone: phone.trim(),
+      })
+      .eq("id", userId); // scoped to the current user only
+
+    setSavingProfile(false);
+
+    if (error) {
+      showToast(`Failed to save profile: ${error.message}`, "error");
+      return;
+    }
+    showToast("Profile saved successfully!", "success");
+  };
+
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
     navigate("/login");
   };
 
+  const cardClass = `${t.cardBg} rounded-2xl p-6 shadow-sm border ${t.border}`;
+  const cardHeadingClass = `text-lg font-bold ${t.headingDark} mb-4 pb-2 border-b ${t.border}`;
+  const labelClass = `text-sm font-medium ${t.textSecondary} mb-1 block`;
+  const inputClass = `${t.inputBg} border ${t.border} rounded-xl px-4 py-3 w-full focus:border-[#C9974A] focus:ring-1 focus:ring-[#C9974A] outline-none ${t.textPrimary}`;
+
   return (
-    <div className="min-h-screen overflow-x-hidden bg-[#FAF7F2]">
+    <div className={`min-h-screen overflow-x-hidden ${t.pageBg}`}>
       <Navbar
         onLogout={handleLogout}
         wishlistLength={wishlistLength}
@@ -148,186 +265,203 @@ const Account = ({
       />
 
       <div className="px-4 sm:px-6 lg:px-8 py-8 max-w-6xl mx-auto">
-        <h1 className="text-2xl sm:text-3xl font-bold mb-6 sm:mb-8 text-[#2C1810]">My Account</h1>
+        <h1 className={`text-2xl sm:text-3xl font-bold mb-6 sm:mb-8 ${t.headingDark}`}>
+          My Account
+        </h1>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* Profile card */}
-          <div className="bg-white rounded-2xl p-6 sm:p-8 shadow-sm border border-[#E8E0D5] text-center lg:col-span-1 h-fit w-full">
-            <div className="bg-gradient-to-br from-[#C9974A] to-[#8a3b21] w-28 h-28 rounded-full flex items-center justify-center text-white text-4xl font-bold mx-auto shadow-lg">
-              {avatarLetter}
-            </div>
-            <h2 className="text-2xl font-bold text-[#2C1810] mt-4">{fullName}</h2>
-            <p className="text-[#6B5B4E] text-sm mt-1">{email}</p>
-            <span className="bg-[#C9974A]/10 text-[#C9974A] text-xs font-semibold px-4 py-1.5 rounded-full mt-3 inline-block">
-              Member since 2026
-            </span>
-
-            <div className="grid grid-cols-3 gap-1.5 sm:gap-2 mt-6">
-              {PROFILE_STATS.map((stat) => (
-                <div
-                  key={stat.key}
-                  className="bg-[#FAF7F2] rounded-xl p-2 sm:p-3 text-center"
-                >
-                  <p className="text-[#C9974A] font-bold text-base sm:text-xl">
-                    {statValues[stat.key]}
-                  </p>
-                  <p className="text-[#6B5B4E] text-[10px] sm:text-xs">{stat.label}</p>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* Settings cards */}
-          <div className="lg:col-span-2 flex flex-col gap-6 w-full">
-            {/* Personal Information */}
-            <div className={CARD_CLASS}>
-              <h3 className={CARD_HEADING_CLASS}>Personal Information</h3>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
-                <div>
-                  <label className={LABEL_CLASS}>First Name</label>
-                  <input
-                    type="text"
-                    value={firstName}
-                    onChange={(e) => setFirstName(e.target.value)}
-                    className={INPUT_CLASS}
-                  />
-                </div>
-                <div>
-                  <label className={LABEL_CLASS}>Last Name</label>
-                  <input
-                    type="text"
-                    value={lastName}
-                    onChange={(e) => setLastName(e.target.value)}
-                    className={INPUT_CLASS}
-                  />
-                </div>
+        {loadingProfile ? (
+          <LoadingSpinner label="Loading your account..." />
+        ) : (
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            {/* Profile card */}
+            <div
+              className={`${t.cardBg} rounded-2xl p-6 sm:p-8 shadow-sm border ${t.border} text-center lg:col-span-1 h-fit w-full`}
+            >
+              <div className="bg-gradient-to-br from-[#C9974A] to-[#8a3b21] w-28 h-28 rounded-full flex items-center justify-center text-white text-4xl font-bold mx-auto shadow-lg">
+                {avatarLetter}
               </div>
-              <div className="mb-4">
-                <label className={LABEL_CLASS}>Email</label>
-                <input
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  className={INPUT_CLASS}
-                />
-              </div>
-              <div className="mb-4">
-                <label className={LABEL_CLASS}>Phone</label>
-                <input
-                  type="tel"
-                  value={phone}
-                  onChange={(e) => setPhone(e.target.value)}
-                  className={INPUT_CLASS}
-                />
-              </div>
-              <button
-                type="button"
-                onClick={() => showToast("Profile saved successfully!", "success")}
-                className="bg-[#C9974A] hover:bg-[#b8863a] text-white font-bold rounded-xl px-6 py-2.5 transition shadow-sm"
-              >
-                Save Changes
-              </button>
-            </div>
+              <h2 className={`text-2xl font-bold mt-4 ${t.headingDark}`}>{fullName}</h2>
+              <p className={`${t.textSecondary} text-sm mt-1`}>{email}</p>
+              <span className="bg-[#C9974A]/10 text-[#C9974A] text-xs font-semibold px-4 py-1.5 rounded-full mt-3 inline-block">
+                Member since {memberSinceYear ?? "—"}
+              </span>
 
-            {/* Change Password */}
-            <div className={CARD_CLASS}>
-              <h3 className={CARD_HEADING_CLASS}>Change Password</h3>
-              <div className="flex flex-col gap-4">
-                <PasswordInput
-                  label="Current Password"
-                  value={currentPassword}
-                  onChange={setCurrentPassword}
-                />
-                <PasswordInput
-                  label="New Password"
-                  value={newPassword}
-                  onChange={setNewPassword}
-                  showStrength
-                />
-                <PasswordInput
-                  label="Confirm Password"
-                  value={confirmPassword}
-                  onChange={setConfirmPassword}
-                />
-              </div>
-              <button
-                type="button"
-                onClick={() => {
-                  if (newPassword !== confirmPassword) {
-                    showToast("Passwords do not match", "error");
-                    return;
-                  }
-                  showToast("Password updated!", "success");
-                  setCurrentPassword("");
-                  setNewPassword("");
-                  setConfirmPassword("");
-                }}
-                className="mt-4 bg-[#2C1810] hover:bg-[#3d2415] text-white font-bold rounded-xl px-6 py-2.5 transition shadow-sm"
-              >
-                Update Password
-              </button>
-            </div>
-
-            {/* Preferences */}
-            <div className={CARD_CLASS}>
-              <h3 className={CARD_HEADING_CLASS}>Preferences</h3>
-              <div className="flex flex-col gap-4">
-                <div className="flex items-center justify-between">
-                  <span className="text-sm font-medium text-[#6B5B4E]">
-                    Dark Mode
-                  </span>
-                  <ToggleSwitch checked={isDark} onChange={toggleTheme} />
-                </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-sm font-medium text-[#6B5B4E]">
-                    Email notifications
-                  </span>
-                  <ToggleSwitch
-                    checked={notifications}
-                    onChange={() => setNotifications((n) => !n)}
-                  />
-                </div>
-                <div className="flex items-center justify-between gap-4">
-                  <span className="text-sm font-medium text-[#6B5B4E]">
-                    Language
-                  </span>
-                  <select
-                    className={`${INPUT_CLASS} w-auto text-sm py-2`}
-                    defaultValue="en"
+              <div className="grid grid-cols-3 gap-1.5 sm:gap-2 mt-6">
+                {PROFILE_STATS.map((stat) => (
+                  <div
+                    key={stat.key}
+                    className={`${t.mutedBg} rounded-xl p-2 sm:p-3 text-center`}
                   >
-                    <option value="en">English</option>
-                  </select>
-                </div>
+                    <p className="text-[#C9974A] font-bold text-base sm:text-xl">
+                      {statValues[stat.key]}
+                    </p>
+                    <p className={`${t.textSecondary} text-[10px] sm:text-xs`}>{stat.label}</p>
+                  </div>
+                ))}
               </div>
             </div>
 
-            {/* Danger Zone */}
-            <div className="rounded-2xl p-6 shadow-sm border border-red-100 bg-red-50/30">
-              <h3 className="text-lg font-bold text-red-500 mb-4 pb-2 border-b border-red-100">
-                Danger Zone
-              </h3>
-              <div className="flex flex-wrap gap-3">
+            {/* Settings cards */}
+            <div className="lg:col-span-2 flex flex-col gap-6 w-full">
+              {/* Personal Information */}
+              <div className={cardClass}>
+                <h3 className={cardHeadingClass}>Personal Information</h3>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
+                  <div>
+                    <label className={labelClass}>First Name</label>
+                    <input
+                      type="text"
+                      value={firstName}
+                      onChange={(e) => setFirstName(e.target.value)}
+                      className={inputClass}
+                    />
+                  </div>
+                  <div>
+                    <label className={labelClass}>Last Name</label>
+                    <input
+                      type="text"
+                      value={lastName}
+                      onChange={(e) => setLastName(e.target.value)}
+                      className={inputClass}
+                    />
+                  </div>
+                </div>
+                <div className="mb-4">
+                  <label className={labelClass}>Email</label>
+                  <input
+                    type="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    className={inputClass}
+                  />
+                </div>
+                <div className="mb-4">
+                  <label className={labelClass}>Phone</label>
+                  <input
+                    type="tel"
+                    value={phone}
+                    onChange={(e) => setPhone(e.target.value)}
+                    className={inputClass}
+                  />
+                </div>
+                <button
+                  type="button"
+                  onClick={handleSaveProfile}
+                  disabled={savingProfile}
+                  className="bg-[#C9974A] hover:bg-[#b8863a] text-white font-bold rounded-xl px-6 py-2.5 transition shadow-sm disabled:opacity-60"
+                >
+                  {savingProfile ? "Saving..." : "Save Changes"}
+                </button>
+              </div>
+
+              {/* Change Password */}
+              <div className={cardClass}>
+                <h3 className={cardHeadingClass}>Change Password</h3>
+                <div className="flex flex-col gap-4">
+                  <PasswordInput
+                    label="Current Password"
+                    value={currentPassword}
+                    onChange={setCurrentPassword}
+                  />
+                  <PasswordInput
+                    label="New Password"
+                    value={newPassword}
+                    onChange={setNewPassword}
+                    showStrength
+                  />
+                  <PasswordInput
+                    label="Confirm Password"
+                    value={confirmPassword}
+                    onChange={setConfirmPassword}
+                  />
+                </div>
                 <button
                   type="button"
                   onClick={() => {
-                    clearWishlist();
-                    showToast("Wishlist cleared", "info");
+                    if (newPassword !== confirmPassword) {
+                      showToast("Passwords do not match", "error");
+                      return;
+                    }
+                    showToast("Password updated!", "success");
+                    setCurrentPassword("");
+                    setNewPassword("");
+                    setConfirmPassword("");
                   }}
-                  className="border border-red-200 text-red-500 hover:bg-red-500 hover:text-white rounded-xl px-4 py-2 text-sm transition"
+                  className="mt-4 bg-[#2C1810] hover:bg-[#3d2415] text-white font-bold rounded-xl px-6 py-2.5 transition shadow-sm"
                 >
-                  Clear Wishlist
+                  Update Password
                 </button>
-                <button
-                  type="button"
-                  onClick={handleLogout}
-                  className="bg-red-500 text-white rounded-xl px-6 py-2.5 font-semibold hover:bg-red-600 transition"
+              </div>
+
+              {/* Preferences */}
+              <div className={cardClass}>
+                <h3 className={cardHeadingClass}>Preferences</h3>
+                <div className="flex flex-col gap-4">
+                  <div className="flex items-center justify-between">
+                    <span className={`text-sm font-medium ${t.textSecondary}`}>
+                      Dark Mode
+                    </span>
+                    <ToggleSwitch checked={isDark} onChange={toggleTheme} />
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className={`text-sm font-medium ${t.textSecondary}`}>
+                      Email notifications
+                    </span>
+                    <ToggleSwitch
+                      checked={notifications}
+                      onChange={() => setNotifications((n) => !n)}
+                    />
+                  </div>
+                  <div className="flex items-center justify-between gap-4">
+                    <span className={`text-sm font-medium ${t.textSecondary}`}>
+                      Language
+                    </span>
+                    <select
+                      className={`${inputClass} w-auto text-sm py-2`}
+                      defaultValue="en"
+                    >
+                      <option value="en">English</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+
+              {/* Danger Zone */}
+              <div
+                className={`rounded-2xl p-6 shadow-sm border ${
+                  isDark ? "border-red-900/40 bg-red-500/5" : "border-red-100 bg-red-50/30"
+                }`}
+              >
+                <h3
+                  className={`text-lg font-bold text-red-500 mb-4 pb-2 border-b ${
+                    isDark ? "border-red-900/40" : "border-red-100"
+                  }`}
                 >
-                  Logout
-                </button>
+                  Danger Zone
+                </h3>
+                <div className="flex flex-wrap gap-3">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      clearWishlist();
+                      showToast("Wishlist cleared", "info");
+                    }}
+                    className="border border-red-200 text-red-500 hover:bg-red-500 hover:text-white rounded-xl px-4 py-2 text-sm transition"
+                  >
+                    Clear Wishlist
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleLogout}
+                    className="bg-red-500 text-white rounded-xl px-6 py-2.5 font-semibold hover:bg-red-600 transition"
+                  >
+                    Logout
+                  </button>
+                </div>
               </div>
             </div>
           </div>
-        </div>
+        )}
       </div>
 
       <Footer />
