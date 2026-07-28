@@ -68,7 +68,11 @@ const AdminLogin = () => {
       <div className="relative w-full max-w-md bg-white rounded-xl2 shadow-premium-lg border border-brand-border p-8 sm:p-9 animate-fadeIn">
         <div className="text-center mb-8">
           <div className="mx-auto mb-4 w-14 h-14">
-            <BrandMark size={56} className="w-full h-full drop-shadow-[0_4px_10px_rgba(44,24,16,0.25)]" />
+            <BrandMark
+              size={56}
+              tone="light"
+              className="w-full h-full drop-shadow-[0_4px_10px_rgba(44,24,16,0.25)]"
+            />
           </div>
           <h1 className="font-display font-semibold text-xl text-brand-ink">
             FabricsBossArena Admin

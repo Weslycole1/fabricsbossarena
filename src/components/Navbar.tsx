@@ -86,7 +86,12 @@ const Navbar = ({ onLogout, cartLength = 0, wishlistLength = 0 }: NavbarProps) =
           <div className="flex items-center gap-1.5 sm:gap-3 shrink-0">
             {isAuthenticated ? (
               <>
-                <Link to="/wishlist" className={iconBtn} title="Wishlist">
+                <Link
+                  to="/wishlist"
+                  className={iconBtn}
+                  title="Wishlist"
+                  aria-label={`Wishlist${wishlistLength > 0 ? `, ${wishlistLength} items` : ""}`}
+                >
                   ❤️
                   {wishlistLength > 0 && (
                     <span className="absolute -top-1 -right-1 min-w-[16px] sm:min-w-[18px] h-[16px] sm:h-[18px] px-0.5 sm:px-1 bg-[#C9974A] text-white text-[9px] sm:text-[10px] font-bold rounded-full flex items-center justify-center">
@@ -95,7 +100,7 @@ const Navbar = ({ onLogout, cartLength = 0, wishlistLength = 0 }: NavbarProps) =
                   )}
                 </Link>
 
-                <Link to="/account" className={iconBtn} title="Account">
+                <Link to="/account" className={iconBtn} title="Account" aria-label="Account">
                   👤
                 </Link>
               </>
@@ -120,7 +125,12 @@ const Navbar = ({ onLogout, cartLength = 0, wishlistLength = 0 }: NavbarProps) =
               </>
             )}
 
-            <Link to="/cart" className={iconBtn} title="Cart">
+            <Link
+              to="/cart"
+              className={iconBtn}
+              title="Cart"
+              aria-label={`Cart${cartLength > 0 ? `, ${cartLength} items` : ""}`}
+            >
               🛒
               {cartLength > 0 && (
                 <span className="absolute -top-1 -right-1 min-w-[16px] sm:min-w-[18px] h-[16px] sm:h-[18px] px-0.5 sm:px-1 bg-[#C9974A] text-white text-[9px] sm:text-[10px] font-bold rounded-full flex items-center justify-center">

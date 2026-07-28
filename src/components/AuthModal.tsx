@@ -188,9 +188,16 @@ const AuthModal = ({
               onChange={(e) => setLoginPassword(e.target.value)}
               className={inputClass}
             />
-            <a href="#" className="text-sm text-[#C9974A] hover:underline self-end">
+            <button
+              type="button"
+              onClick={() => {
+                onClose();
+                navigate("/login", { state: { openForgotPassword: true, email: loginEmail } });
+              }}
+              className="text-sm text-[#C9974A] hover:underline self-end"
+            >
               Forgot password?
-            </a>
+            </button>
             <button
               type="submit"
               disabled={isLoggingIn}

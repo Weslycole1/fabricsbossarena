@@ -3,6 +3,8 @@ import BrandMark from "./BrandMark";
 interface LogoProps {
   /** Pixel size of the icon badge. */
   iconSize?: number;
+  /** Which surface the mark sits on — controls the weft strand's color for legibility. */
+  tone?: "dark" | "light";
   /** Tailwind size classes for the icon wrapper, e.g. "w-8 h-8 sm:w-9 sm:h-9" for responsive scaling. */
   iconWrapperClassName?: string;
   /** Tailwind classes for the wordmark text (color + responsive size), e.g. "text-white text-base sm:text-xl". */
@@ -25,6 +27,7 @@ interface LogoProps {
  */
 const Logo = ({
   iconSize = 36,
+  tone = "dark",
   iconWrapperClassName = "",
   wordmarkClassName = "text-white text-lg",
   subtitle,
@@ -35,7 +38,7 @@ const Logo = ({
 }: LogoProps) => (
   <span className={`inline-flex items-center gap-2.5 ${className}`}>
     <span className={iconWrapperClassName}>
-      <BrandMark size={iconSize} className="flex-shrink-0 w-full h-full" />
+      <BrandMark size={iconSize} tone={tone} className="flex-shrink-0 w-full h-full" />
     </span>
     {!iconOnly && (
       <span className={wordmarkWrapperClassName}>

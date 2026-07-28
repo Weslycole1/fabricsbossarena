@@ -4,6 +4,7 @@ import type { Product } from "./types/product";
 
 import Home from "./pages/Home";
 import Login from "./pages/Login";
+import ResetPassword from "./pages/ResetPassword";
 import Products from "./pages/Products";
 import About from "./pages/About";
 import Contact from "./pages/Contact";
@@ -164,6 +165,7 @@ function App() {
       />
       <Route path="/login" element={<Login />} />
       <Route path="/signup" element={<Login />} />
+      <Route path="/reset-password" element={<ResetPassword />} />
       <Route
         path="/home"
         element={

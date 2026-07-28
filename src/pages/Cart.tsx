@@ -178,6 +178,7 @@ Please confirm availability and delivery details. Thank you!`;
                       type="button"
                       onClick={() => decreaseQty(item.id)}
                       className={t.qtyBtn}
+                      aria-label={`Decrease quantity of ${item.name}`}
                     >
                       -
                     </button>
@@ -188,6 +189,7 @@ Please confirm availability and delivery details. Thank you!`;
                       type="button"
                       onClick={() => increaseQty(item.id)}
                       className={t.qtyBtn}
+                      aria-label={`Increase quantity of ${item.name}`}
                     >
                       +
                     </button>

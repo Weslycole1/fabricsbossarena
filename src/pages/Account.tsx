@@ -138,6 +138,7 @@ const Account = ({
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [savingPassword, setSavingPassword] = useState(false);
   const [notifications, setNotifications] = useState(true);
 
   // Always load the CURRENTLY authenticated user's profile — never hardcoded,
@@ -244,6 +245,57 @@ const Account = ({
       return;
     }
     showToast("Profile saved successfully!", "success");
+  };
+
+  const handleUpdatePassword = async () => {
+    if (!currentPassword || !newPassword || !confirmPassword) {
+      showToast("Please fill in all password fields.", "error");
+      return;
+    }
+    if (newPassword.length < 6) {
+      showToast("New password must be at least 6 characters.", "error");
+      return;
+    }
+    if (newPassword !== confirmPassword) {
+      showToast("Passwords do not match", "error");
+      return;
+    }
+    if (newPassword === currentPassword) {
+      showToast("New password must be different from the current password.", "error");
+      return;
+    }
+
+    setSavingPassword(true);
+
+    // Re-authenticate with the current password first — this both verifies
+    // it's correct and confirms this is really the account owner before we
+    // let them change the password.
+    const { error: verifyError } = await supabase.auth.signInWithPassword({
+      email,
+      password: currentPassword,
+    });
+
+    if (verifyError) {
+      setSavingPassword(false);
+      showToast("Current password is incorrect.", "error");
+      return;
+    }
+
+    const { error: updateError } = await supabase.auth.updateUser({
+      password: newPassword,
+    });
+
+    setSavingPassword(false);
+
+    if (updateError) {
+      showToast(updateError.message, "error");
+      return;
+    }
+
+    showToast("Password updated!", "success");
+    setCurrentPassword("");
+    setNewPassword("");
+    setConfirmPassword("");
   };
 
   const handleLogout = async () => {
@@ -377,19 +429,11 @@ const Account = ({
                 </div>
                 <button
                   type="button"
-                  onClick={() => {
-                    if (newPassword !== confirmPassword) {
-                      showToast("Passwords do not match", "error");
-                      return;
-                    }
-                    showToast("Password updated!", "success");
-                    setCurrentPassword("");
-                    setNewPassword("");
-                    setConfirmPassword("");
-                  }}
-                  className="mt-4 bg-[#2C1810] hover:bg-[#3d2415] text-white font-bold rounded-xl px-6 py-2.5 transition shadow-sm"
+                  onClick={handleUpdatePassword}
+                  disabled={savingPassword}
+                  className="mt-4 bg-[#2C1810] hover:bg-[#3d2415] text-white font-bold rounded-xl px-6 py-2.5 transition shadow-sm disabled:opacity-60"
                 >
-                  Update Password
+                  {savingPassword ? "Updating..." : "Update Password"}
                 </button>
               </div>
 
